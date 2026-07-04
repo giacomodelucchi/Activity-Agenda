@@ -3,8 +3,10 @@
 //Costruttore
 Lista::Lista(unsigned int id,
              const QString& titolo,
+             const QString& luogo,
+             const QDateTime& orario,
              const QVector<VoceLista>& elementi)
-            : Attivita(id, titolo),
+            : Attivita(id, titolo, luogo, orario),
             elementi(elementi)
             {}
 
@@ -17,10 +19,6 @@ Lista::Lista(const Lista& l)
 //Distruttore virtuale
 Lista::~Lista() = default;
 
-const QVector<VoceLista>& Lista::getElementi() const{
-    return elementi;
-}
-
 //Metodi set
 void Lista::setElementi(const QVector<VoceLista>& newElementi){
     elementi = newElementi;
@@ -30,7 +28,7 @@ void Lista::setElementi(const QVector<VoceLista>& newElementi){
 
 //Aggiunge una voce in coda
 bool Lista::aggiungiVoce(const VoceLista& voce){
-    if(elementi.contains(voce))     //per questo serve operator== di VoceLista
+    if (elementi.contains(voce))     //per questo serve operator== di VoceLista
         return false;
     else
     {
@@ -81,4 +79,5 @@ unsigned int Lista::numeroVoci() const
 {
     return static_cast<unsigned int>(elementi.size());
 }
+
 

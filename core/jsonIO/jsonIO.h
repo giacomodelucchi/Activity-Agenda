@@ -1,3 +1,14 @@
+#ifndef JSONIO_H
+#define JSONIO_H
+
+#include "../container/memoria.h"
+#include "jsonParser.h"
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+
+#include "../gerarchia/attivita.h"
 class JsonIO {
 private:
         QString filePath;
@@ -12,7 +23,11 @@ public:
     //Metodi get
     QString getFilePath() const;
     
-    bool save(const QVector<Attivita*>& activities) const;
-    bool load(QVector<Attivita*>& outActivities) const;
+    //scrive sul file i dati di tutte le Attivita contenuti nel container
+    bool save(const Memoria& activities) const;
 
+    //legge il contenuto del file path, riempendo un container passato per riferimento
+    bool load(Memoria& activities) const;
 };
+
+#endif //JSONIO_H

@@ -14,6 +14,7 @@
 
         //Costruttore di copia
         VoceLista(const VoceLista&);
+        VoceLista& operator=(const VoceLista&);
 
         //Metodi get
         const QString& getTesto() const;

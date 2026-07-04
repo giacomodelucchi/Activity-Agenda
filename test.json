@@ -1,0 +1,171 @@
+[
+    {
+        "descrizione": "",
+        "id": 1,
+        "luogo": "Sala A",
+        "orario": "2026-12-25T15:30:00",
+        "tipo": "Evento",
+        "titolo": "Riunione progetto"
+    },
+    {
+        "descrizione": "",
+        "frequenza": "Settimanale",
+        "id": 2,
+        "illimitata": false,
+        "luogo": "Palestra",
+        "numOccorrenze": 8,
+        "orario": "2026-11-02T08:35:00",
+        "tipo": "EventoRicorrente",
+        "titolo": "Allenamento"
+    },
+    {
+        "descrizione": "",
+        "id": 3,
+        "luogo": "Ufficio 101",
+        "orario": "2026-10-12T10:00:00",
+        "tipo": "Evento",
+        "titolo": "Presentazione cliente"
+    },
+    {
+        "descrizione": "",
+        "frequenza": "Mensile",
+        "id": 4,
+        "illimitata": false,
+        "luogo": "Sala Benessere",
+        "numOccorrenze": 6,
+        "orario": "2026-10-15T18:00:00",
+        "tipo": "EventoRicorrente",
+        "titolo": "Corso Yoga"
+    },
+    {
+        "descrizione": "",
+        "id": 5,
+        "luogo": "Ristorante Centrale",
+        "orario": "2026-09-30T20:00:00",
+        "tipo": "Evento",
+        "titolo": "Cena con amici"
+    },
+    {
+        "descrizione": "",
+        "frequenza": "Settimanale",
+        "id": 6,
+        "illimitata": true,
+        "luogo": "Server room",
+        "numOccorrenze": 0,
+        "orario": "2026-09-28T23:00:00",
+        "tipo": "EventoRicorrente",
+        "titolo": "Backup settimanale"
+    },
+    {
+        "elementi": [
+            {
+                "completata": true,
+                "testo": "Comprare latte"
+            },
+            {
+                "completata": true,
+                "testo": "Prendere uova"
+            },
+            {
+                "completata": false,
+                "testo": "Acquistare pane"
+            }
+        ],
+        "id": 7,
+        "luogo": "Padova",
+        "orario": "2026-07-03T18:49:17",
+        "tipo": "Lista",
+        "titolo": "Lista spesa"
+    },
+    {
+        "descrizione": "",
+        "id": 8,
+        "luogo": "Sala B",
+        "orario": "2026-10-05T14:30:00",
+        "tipo": "Evento",
+        "titolo": "Colloquio HR"
+    },
+    {
+        "descrizione": "",
+        "frequenza": "Giornaliera",
+        "id": 9,
+        "illimitata": false,
+        "luogo": "Biblioteca",
+        "numOccorrenze": 10,
+        "orario": "2026-10-01T09:00:00",
+        "tipo": "EventoRicorrente",
+        "titolo": "Ripasso manuale"
+    },
+    {
+        "descrizione": "Provo a inserirew un esempio di descrizione\nProvo a inserirew un esempio di descrizione\nProvo a inserirew un esempio di descrizione\nProvo a inserirew un esempio di descrizione\nProvo a inserirew un esempio di descrizione\nProvo a inserirew un esempio di descrizione\nProvo a inserirew un esempio di descrizione\nProvo a inserirew un esempio di descrizione\nProvo a inserirew un esempio di descrizione\nProvo a inserirew un esempio di descrizione\nProvo a inserirew un esempio di descrizione\nProvo a inserirew un esempio di descrizione\nProvo a inserirew un esempio di descrizione",
+        "id": 10,
+        "luogo": "Scrivania",
+        "orario": "2026-09-29T17:00:00",
+        "tipo": "Evento",
+        "titolo": "Invio report"
+    },
+    {
+        "descrizione": "",
+        "frequenza": "Annuale",
+        "id": 11,
+        "illimitata": false,
+        "luogo": "Server room",
+        "numOccorrenze": 1,
+        "orario": "2026-09-25T09:30:00",
+        "tipo": "EventoRicorrente",
+        "titolo": "Verifica sistema"
+    },
+    {
+        "elementi": [
+            {
+                "completata": false,
+                "testo": "Pulire cucina"
+            },
+            {
+                "completata": false,
+                "testo": "Lavare pavimenti"
+            }
+        ],
+        "id": 12,
+        "luogo": "",
+        "orario": "",
+        "tipo": "Lista",
+        "titolo": "Lista attività casa"
+    },
+    {
+        "descrizione": "",
+        "id": 13,
+        "luogo": "Ufficio 202",
+        "orario": "2026-10-03T11:00:00",
+        "tipo": "Evento",
+        "titolo": "Revisione budget"
+    },
+    {
+        "descrizione": "",
+        "frequenza": "Giornaliera",
+        "id": 14,
+        "illimitata": true,
+        "luogo": "Sala Zen",
+        "numOccorrenze": 0,
+        "orario": "2026-09-28T07:00:00",
+        "tipo": "EventoRicorrente",
+        "titolo": "Meditazione"
+    },
+    {
+        "elementi": [
+            {
+                "completata": false,
+                "testo": "Regalo per Sara"
+            },
+            {
+                "completata": false,
+                "testo": "Regalo per Marco"
+            }
+        ],
+        "id": 15,
+        "luogo": "Toys",
+        "orario": "2026-07-03T18:50:03",
+        "tipo": "Lista",
+        "titolo": "Lista regali"
+    }
+]

@@ -1,0 +1,34 @@
+[
+    {
+        "id": 1,
+        "luogo": "Sala A",
+        "orario": "2026-12-25T15:30:00",
+        "tipo": "Evento",
+        "titolo": "Riunione progetto"
+    },
+    {
+        "frequenza": "Settimanale",
+        "id": 2,
+        "illimitata": false,
+        "luogo": "Palestra",
+        "numOccorrenze": 8,
+        "orario": "2026-11-02T08:35:00",
+        "tipo": "EventoRicorrente",
+        "titolo": "Allenamento"
+    },
+    {
+        "elementi": [
+            {
+                "completata": false,
+                "testo": "Comprare latte"
+            },
+            {
+                "completata": true,
+                "testo": "Chiamare Marco"
+            }
+        ],
+        "id": 3,
+        "tipo": "Lista",
+        "titolo": "Lista spesa"
+    }
+]

@@ -6,47 +6,30 @@
 
 #include <QString>
 #include <QVector>
+#include <QDateTime>
 
 class Lista : public Attivita {
 private:
     QVector<VoceLista> elementi;
 
 public:
-    //Costruttore
     Lista(unsigned int = 0,
           const QString& = "SCONOSCIUTO",
+          const QString& = "SCONOSCIUTO",
+          const QDateTime& = QDateTime(),
           const QVector<VoceLista>& = QVector<VoceLista>());
 
-    //Costruttore di copia
     Lista(const Lista&);
-
-    //Distruttore virtuale
     ~Lista() override;
 
-    //Metodi get
-    const QVector<VoceLista>& getElementi() const;
+    unsigned int numeroVoci() const;
+    const VoceLista& getVoce(unsigned int indice) const;
+    void setElementi(const QVector<VoceLista>& newElementi);
 
-    //Metodi set
-    void setElementi(const QVector<VoceLista>&);
-
-    //Gestione voci della lista
-    bool aggiungiVoce(const VoceLista&);             //per aggiungere una voce in coda alla lista
-    bool rimuoviVoce(unsigned int);             //per cancellare una determinata voce dalla lista
-    bool spostaVoce(unsigned int, unsigned int);    //per spostare una voce all'interno della lista
-    bool setStatoVoce(unsigned int, bool);         //cambia lo stato di una determinata voce
-
-    const VoceLista& Lista::getVoce(unsigned int) const; //leggere una voce specifica (ad es per stampare a schermo la lista) se esce dai bound lancia un'eccezione std::out_of_range
-    unsigned int numeroVoci() const;        //conoscere il numnero di voci in lista
-
-    /*
-    //Metodo di clonazione per copia polimorfica
-    virtual Lista* clone() const override;
-    */
-
-    /*
-    //accept per Visitor
-    virtual void accept(ActivityVisitorInterface&) const override;
-    */
+    bool aggiungiVoce(const VoceLista& voce);
+    bool rimuoviVoce(unsigned int indice);
+    bool spostaVoce(unsigned int origine, unsigned int destinazione);
+    bool setStatoVoce(unsigned int indice, bool stato);
 };
 
 #endif // LISTA_H

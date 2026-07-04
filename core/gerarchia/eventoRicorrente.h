@@ -2,16 +2,9 @@
 #define EVENTORICORRENTE_H
 
 #include "evento.h"
+#include "frequenza.h"
 #include <QString>
 #include <QDateTime>
-
-enum class Frequenza {
-    Nessuna,
-    Giornaliera,
-    Settimanale,
-    Mensile,
-    Annuale
-};
 
 class EventoRicorrente : public Evento {
 private:
@@ -25,6 +18,7 @@ public:
                      const QString& = "SCONOSCIUTO",
                      const QString& = "SCONOSCIUTO",
                      const QDateTime& = QDateTime(),
+                     const QString& = QString(),
                     Frequenza = Frequenza::Nessuna,
                      unsigned int = 0,
                      bool = false);

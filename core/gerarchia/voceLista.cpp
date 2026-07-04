@@ -12,6 +12,15 @@ VoceLista::VoceLista(const VoceLista& other)
     completata(other.completata)
 {}
 
+//ridefinizione dell'operatore di assegnazione
+VoceLista& VoceLista::operator=(const VoceLista& other) {
+    if (this != &other) {
+        testo = other.testo;
+        completata = other.completata;
+    }
+    return *this;
+}
+
 //Metodi get
 const QString& VoceLista::getTesto() const{
     return testo;

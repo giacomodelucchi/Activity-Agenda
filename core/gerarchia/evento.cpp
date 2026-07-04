@@ -3,31 +3,26 @@
 Evento::Evento(unsigned int id,
        const QString& titolo,
        const QString& luogo,
-       const QDateTime& orario
+       const QDateTime& orario,
+       const QString& descrizione
        )
-    : Attivita(id, titolo), luogo(luogo), orario(orario){}
+    : Attivita(id, titolo, luogo, orario), descrizione(descrizione){}
 
 //Costruttore di copia
 Evento::Evento(const Evento& e)
-    : Attivita(e), luogo(e.luogo), orario(e.orario){}
+    : Attivita(e), descrizione(e.descrizione){}
 
 //Distruttore virtuale
 Evento::~Evento() = default;
 
 //Metodi get
-QString Evento::getLuogo() const{
-    return luogo;
-}
-QDateTime Evento::getOrario() const{
-    return orario;
+QString Evento::getDescrizione() const{
+    return descrizione;
 }
 
 //Metodi set
-void Evento::setLuogo(const QString& newLuogo){
-    luogo = newLuogo;
-}
-void Evento::setOrario(const QDateTime& newOrario){
-    orario = newOrario;
+void Evento::setDescrizione(const QString& newDescrizione){
+    descrizione = newDescrizione;
 }
 
 /*

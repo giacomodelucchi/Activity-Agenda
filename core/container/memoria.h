@@ -1,39 +1,37 @@
 #ifndef MEMORIA_H
 #define MEMORIA_H
 
+#include <map>
 #include <memory>
-#include <QMap>
 
 class Attivita;
-//rappresenta la memoria per gli oggetti Attivita creati
-//gli id delle Attivita sono la chiave della mappa, mentre i valori sono unique pointers agli oggetti Attivita
+
 class Memoria {
 private:
-    QMap<unsigned int, std::unique_ptr<Attivita>> memoriaAttivita;
+    std::map<unsigned int, std::unique_ptr<Attivita>> memoriaAttivita;
 public:
-    //Costruttore
     Memoria() = default;
-
-    //Copia vietata per mantenere unici gli unique pointers
     Memoria(const Memoria&) = delete;
-    
-    //Distruttore 
     ~Memoria() = default;
 
-    //Metodi get
-    const QMap<unsigned int, std::unique_ptr<Attivita>>& items() const;
-
-    //Metodi
     void aggiungi(std::unique_ptr<Attivita> attivita);
-    
     bool rimuovi(const Attivita* attivita);
     bool rimuoviPerId(unsigned int idAttivita);
     void svuotaMemoria();
-    
+
     bool contieneId(unsigned int idAttivita) const;
     const Attivita* cercaPerId(unsigned int idAttivita) const;
-    
+    Attivita* cercaPerId(unsigned int idAttivita);
     unsigned int size() const;
+
+    template <typename Func>
+    void perOgniAttivita(Func&& fn) const {
+        for (const auto& entry : memoriaAttivita) {
+            if (entry.second) {
+                fn(*entry.second);
+            }
+        }
+    }
 };
 
 #endif // MEMORIA_H

@@ -4,11 +4,12 @@ EventoRicorrente::EventoRicorrente(unsigned int id,
                  const QString& titolo,
                 const QString& luogo,
                 const QDateTime& orario,
+                const QString& descrizione,
                Frequenza frequenza,
                unsigned int numOccorrenze,
                bool illimitata
                )
-    : Evento(id, titolo, luogo, orario), frequenza(frequenza), numOccorrenze(illimitata ? 0 : numOccorrenze), illimitata(illimitata)
+    : Evento(id, titolo, luogo, orario, descrizione), frequenza(frequenza), numOccorrenze(illimitata ? 0 : numOccorrenze), illimitata(illimitata)
 {}
 
 //Costruttore di copia
