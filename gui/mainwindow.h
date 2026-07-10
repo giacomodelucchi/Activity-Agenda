@@ -3,16 +3,18 @@
 
 #include <QMainWindow>
 #include <memory>
-
-class QStackedWidget;
-class QPushButton;
+#include <QCloseEvent>
 
 #include "../core/container/memoria.h"
 #include "../core/jsonIO/jsonIO.h"
 
+class QStackedWidget;
+class QPushButton;
+class QToolButton;
 class VistaElencoAttivita;
 class VistaDettaglioAttivita;
 class VistaEditorAttivita;
+class VistaAiuto;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT  
@@ -29,7 +31,13 @@ private:
     VistaElencoAttivita* elenco = nullptr;
     VistaDettaglioAttivita* dettaglio = nullptr;
     VistaEditorAttivita* editor = nullptr;
+    VistaAiuto* aiuto = nullptr;
+    
     unsigned int currentActivityId = 0;
+    std::unique_ptr<Attivita> pendingActivity;  // nuova attività in fase di creazione nell'editor, prima di premere "Salva"
+    unsigned int nextActivityId() const;
+
+    QToolButton* helpButton = nullptr;
 
 private slots:  
     void onLoad();
@@ -38,9 +46,10 @@ private slots:
     void showDettaglio(unsigned int id);    // mostra la vista dettaglio per l'attività con l'id specificato
     void showEditor(unsigned int id);       // mostra la vista editor per l'attività con l'id specificato
     void addActivity(int type);             // crea una nuova attività del tipo selezionato
+    void updateHelpButtonVisibility();      
 
-private:
-    unsigned int nextActivityId() const;
+protected:
+    void closeEvent(QCloseEvent* event) override;   //viene chiamata quando si clicca su "X" per chiudere il programma
 };
 
 #endif // MAINWINDOW_H

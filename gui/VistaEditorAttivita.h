@@ -2,15 +2,24 @@
 #define VISTAEDITORATTIVITA_H
 
 #include <QWidget>
-
-class QLineEdit;
-class QTextEdit;
-class QPushButton;
-class QLabel;
-class QTreeWidget;
-class QDateTimeEdit;
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QTextEdit>
+#include <QDateTime>
+#include <QDateTimeEdit>
+#include <QLabel>
+#include <QPushButton>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QCheckBox>
 
 #include "../core/gerarchia/attivita.h"
+#include "../core/gerarchia/evento.h"
+#include "../core/gerarchia/eventoRicorrente.h"
+#include "../core/gerarchia/lista.h"
+#include "VistaEditorLista.h"
 
 class VistaEditorAttivita : public QWidget {
     Q_OBJECT
@@ -29,16 +38,26 @@ private slots:
     void markDirty();
 
 private:
-    Attivita* current = nullptr;
+    QFormLayout* formLayout = nullptr;
+    Attivita* current = nullptr;        //attività che sta venendo modificata nell'editor
+    
+    //campi comuni
     QLineEdit* titleEdit = nullptr;
     QTextEdit* descriptionEdit = nullptr;
     QLineEdit* locationEdit = nullptr;
     QDateTimeEdit* dateTimeEdit = nullptr;
-    QLabel* itemsLabel = nullptr;
-    QTreeWidget* itemList = nullptr;
+
+    //campi di EventoRicorrente
+    QComboBox* frequenzaCombo;
+    QSpinBox* numOccorrenzeSpin;
+    QCheckBox* illimitataCheck;
+
+    //editor per oggetti Lista
+    VistaEditorLista* listaEditor = nullptr;
+
     QPushButton* saveButton = nullptr;
     QPushButton* cancelButton = nullptr;
-    bool dirty = false;
+    bool dirty = false;                 //indica se l'editor ha modifiche non salvate rispetto all'attività corrente
 };
 
 #endif // VISTAEDITORATTIVITA_H

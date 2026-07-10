@@ -25,17 +25,5 @@ void Evento::setDescrizione(const QString& newDescrizione){
     descrizione = newDescrizione;
 }
 
-/*
-//accept per Visitor
-void Evento::accept(ActivityVisitorInterface& visitor) const{
-    visitor.visitEvento(*this);
-}
-*/
-/*
-//Metodo di clonazione per copia polimorfica
-Evento* Evento::clone() const{
-    return new Evento(*this);
-}
-*/
 
 

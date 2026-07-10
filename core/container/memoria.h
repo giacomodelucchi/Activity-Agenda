@@ -9,6 +9,7 @@ class Attivita;
 class Memoria {
 private:
     std::map<unsigned int, std::unique_ptr<Attivita>> memoriaAttivita;
+    bool modificheNonSalvate = false;
 public:
     Memoria() = default;
     Memoria(const Memoria&) = delete;
@@ -24,6 +25,11 @@ public:
     Attivita* cercaPerId(unsigned int idAttivita);
     unsigned int size() const;
 
+    bool haModificheNonSalvate() const;
+    void salvaEffettuato();
+    void modificaEffettuata();
+
+    //gli viene passata una funzioen e la esegue su ogni Attività in memoria
     template <typename Func>
     void perOgniAttivita(Func&& fn) const {
         for (const auto& entry : memoriaAttivita) {

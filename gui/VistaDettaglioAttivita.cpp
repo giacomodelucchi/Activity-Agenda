@@ -66,6 +66,7 @@ void VistaDettaglioAttivita::setActivity(const Attivita* a)
     editButton->setEnabled(true);
     deleteButton->setEnabled(true);
 
+    //costruzione della stringa contenente i dettagli dell'attività
     QString details;
     if (const EventoRicorrente* er = dynamic_cast<const EventoRicorrente*>(a)) {
         details += tr("Tipo: Ricorrenza\n");
@@ -75,8 +76,12 @@ void VistaDettaglioAttivita::setActivity(const Attivita* a)
             : tr("Non specificato"));
         details += tr("Descrizione: %1\n").arg(placeholder(er->getDescrizione()));
         details += tr("Frequenza: %1\n").arg(JsonParser::frequenzaToString(er->getFrequenza()));
-        details += tr("Occorrenze: %1\n").arg(er->getNumOccorrenze());
-        details += tr("Illimitata: %1").arg(er->isIllimitata() ? tr("Sì") : tr("No"));
+        if (er->isIllimitata()){
+            details += tr("Ricorrenza illimitata\n");
+        }
+        else{
+            details += tr("Numero di occorrenze: %1\n").arg(er->getNumOccorrenze());
+        }
     } else if (const Evento* ev = dynamic_cast<const Evento*>(a)) {
         details += tr("Tipo: Evento\n");
         details += tr("Luogo: %1\n").arg(placeholder(ev->getLuogo()));

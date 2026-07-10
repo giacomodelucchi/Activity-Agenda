@@ -25,21 +25,13 @@ class Attivita {
         unsigned int getId() const;
         QString getTitolo() const;
         QString getLuogo() const;
-        QDateTime getOrario() const;
+        virtual QDateTime getOrario() const;
 
         //Metodi set
         void setId(unsigned int);
         void setTitolo(const QString&);
         void setLuogo(const QString&);
-        void setOrario(const QDateTime&);
-        /*
-        //accept virtuale puro per Visitor
-        virtual void accept(ActivityVisitorInterface&) const = 0;
-*/
-        /*
-        //Metodo di clonazione per copia polimorfica
-        virtual Attivita* clone() const = 0;
-*/
+        virtual void setOrario(const QDateTime&);
 };
 
 #endif // ATTIVITA_H

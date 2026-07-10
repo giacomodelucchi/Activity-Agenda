@@ -29,14 +29,6 @@ public:
 
     //Metodi set
     void setDescrizione(const QString&);
-    /*
-    //Metodo di clonazione per copia polimorfica
-    virtual Evento* clone() const override;
-    */
-    /*
-    //accept per Visitor
-    virtual void accept(ActivityVisitorInterface&) const override;
-    */
 };
 
 #endif // EVENTO_H

@@ -42,7 +42,7 @@ public:
             if (a != b) return a < b;
             return text(0) < other.text(0);
         }
-        return QTreeWidgetItem::operator<(other);
+        return QTreeWidgetItem::operator<(other);   //se non c'è un QTreeWidget associato, usa l'ordinamento predefinito
     }
 };
 
@@ -54,24 +54,28 @@ VistaElencoAttivita::VistaElencoAttivita(QWidget* parent)
 
     search = new QLineEdit(this);
     search->setPlaceholderText(tr("Cerca..."));
-    deleteButton = new QPushButton(style()->standardIcon(QStyle::SP_TrashIcon), tr("Elimina"), this);
-    deleteButton->setEnabled(false);
+    
     addButton = new QToolButton(this);
     addButton->setText(tr("Aggiungi"));
     addButton->setIcon(style()->standardIcon(QStyle::SP_FileDialogNewFolder));
-    addButton->setPopupMode(QToolButton::InstantPopup);
+    addButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    addButton->setPopupMode(QToolButton::InstantPopup); 
     QMenu* addMenu = new QMenu(this);
     addMenu->addAction(style()->standardIcon(QStyle::SP_FileIcon), tr("Evento"), this, [this](){ onAddRequested(VistaElencoAttivita::TipoEvento); });
     addMenu->addAction(style()->standardIcon(QStyle::SP_DialogOpenButton), tr("Evento ricorrente"), this, [this](){ onAddRequested(VistaElencoAttivita::TipoEventoRicorrente); });
     addMenu->addAction(style()->standardIcon(QStyle::SP_DirIcon), tr("Lista"), this, [this](){ onAddRequested(VistaElencoAttivita::TipoLista); });
     addButton->setMenu(addMenu);
 
+    deleteButton = new QPushButton(style()->standardIcon(QStyle::SP_TrashIcon), tr("Elimina"), this);
+    deleteButton->setEnabled(false);
+    
     topLayout->addWidget(search);
     topLayout->addStretch();
-    topLayout->addWidget(deleteButton);
     topLayout->addWidget(addButton);
+    topLayout->addWidget(deleteButton);
 
-    list = new QTreeWidget(this);
+    //lista delle attività, implementata come QTreeWidget per permettere la visualizzazione di più colonne e la selezione multipla
+    list = new QTreeWidget(this);   
     list->setColumnCount(4);
     list->setHeaderLabels({tr("Titolo"), tr("Luogo"), tr("Orario"), tr("Tipo")});
     list->setRootIsDecorated(false);
@@ -80,7 +84,7 @@ VistaElencoAttivita::VistaElencoAttivita(QWidget* parent)
     list->setSelectionMode(QAbstractItemView::ExtendedSelection);
     list->setEditTriggers(QAbstractItemView::NoEditTriggers);
     list->header()->setSectionsClickable(true);
-    list->header()->setStretchLastSection(true);
+    list->header()->setSectionResizeMode(QHeaderView::Stretch);
     list->setStyleSheet(
         "QTreeWidget { background: white; border: none; }"
         "QTreeWidget::item:selected { background: #c8dcff; }");
@@ -114,7 +118,25 @@ void VistaElencoAttivita::refreshList()
     if (!memoria) return;
 
     unsigned int visibleCount = 0;
-    memoria->perOgniAttivita([this, &visibleCount](const Attivita& a){
+    const QDateTime now = QDateTime::currentDateTime();
+
+    //ricerca della prossima data in cui verrà svolta un'attività
+    QDate prossimaData;
+    memoria->perOgniAttivita([now, &prossimaData](const Attivita& a) {
+        QDateTime dt = a.getOrario();
+
+        if (!dt.isValid())
+            return;
+
+        // ignora le attività già passate
+        if (dt < now)
+            return;
+
+        if (!prossimaData.isValid() || dt.date() < prossimaData)
+            prossimaData = dt.date();
+    });
+
+    memoria->perOgniAttivita([this, &visibleCount, now, prossimaData](const Attivita& a){
         auto placeholder = [this](const QString& value){      
             return value.trimmed().isEmpty() ? tr("Non specificato") : value;   // se il campo è vuoto, mostra "Non specificato"
         };
@@ -125,28 +147,27 @@ void VistaElencoAttivita::refreshList()
         QString orario = tr("Non specificato");
         QString tipo = tr("Attività");
         QColor bgColor = QColor(255, 240, 220);
-        QDateTime orarioQt;
 
         //personalizzazione a seconda del tipo di attività
-        if (const EventoRicorrente* ric = dynamic_cast<const EventoRicorrente*>(&a)) {
+        if (dynamic_cast<const EventoRicorrente*>(&a)) {
             bgColor = QColor(220, 255, 220);
-            orarioQt = ric->getOrario();
             tipo = tr("Ricorrenza");
-        } else if (const Evento* ev = dynamic_cast<const Evento*>(&a)) {
+        } else if (dynamic_cast<const Evento*>(&a)) {
             bgColor = QColor(220, 235, 255);
-            orarioQt = ev->getOrario();
             tipo = tr("Evento");
-        } else if (const Lista* lista = dynamic_cast<const Lista*>(&a)) {
+        } else if (dynamic_cast<const Lista*>(&a)) {
             bgColor = QColor(255, 240, 220);
-            orarioQt = lista->getOrario();
             tipo = tr("Lista");
-        }
+        }      
 
+        OrdinalTreeWidgetItem* item = new OrdinalTreeWidgetItem(list);  // OrdinalTreeWidgetItem per ordinamento personalizzato
+
+        QDateTime orarioQt = a.getOrario(); 
         if (orarioQt.isValid()) {
             orario = QLocale::system().toString(orarioQt, QLocale::ShortFormat);
         }
 
-        OrdinalTreeWidgetItem* item = new OrdinalTreeWidgetItem(list);  // OrdinalTreeWidgetItem per ordinamento personalizzato
+        // Imposta i valori delle colonne della tabella per l'attività corrente
         item->setText(0, titolo);   
         item->setText(1, luogo);
         item->setText(2, orario);
@@ -154,15 +175,29 @@ void VistaElencoAttivita::refreshList()
         item->setData(0, Qt::UserRole, static_cast<int>(a.getId()));    // inserisce l'ID dell'attività come dato utente nella prima colonna
         item->setData(2, Qt::UserRole, orarioQt);
 
-            for (int col = 0; col < list->columnCount(); ++col) {
+        // personalizzazione delle righe della tabella a seconda del tipo di attività e dello stato (passata, prossima, ecc.)
+        for (int col = 0; col < list->columnCount(); ++col) {
             item->setBackground(col, bgColor);
+        }
+        if (orarioQt.isValid()) {
+            if (orarioQt < now) {                                       // attività passata
+                for (int col = 0; col < list->columnCount(); ++col)
+                    item->setForeground(col, Qt::lightGray);
+            }
+            else if (orarioQt.date() == prossimaData) {                 // attività del prossimo giorno utile
+                for (int col = 0; col < list->columnCount(); ++col)
+                    item->setBackground(col, QColor(255, 250, 190));
+                QFont f = item->font(0);
+                f.setBold(true);
+                item->setFont(0, f);    
+            }
         }
         visibleCount++;         // serve a contare quante attività sono visibili dopo il filtraggio
     });
 
-    emptyStateLabel->setVisible(visibleCount == 0);
-    list->setVisible(visibleCount > 0);
-    deleteButton->setEnabled(false);
+    emptyStateLabel->setVisible(visibleCount == 0); // mostra il messaggio di stato vuoto se non ci sono attività 
+    list->setVisible(visibleCount > 0);             // rende visibile la tabella solo se ci sono attività
+    deleteButton->setEnabled(false);                
 }
 
 // chiamata quando un elemento della tabella viene cliccato

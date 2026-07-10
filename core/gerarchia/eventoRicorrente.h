@@ -11,17 +11,18 @@ private:
     Frequenza frequenza;
     unsigned int numOccorrenze;
     bool illimitata;
+    QDateTime dataInizio;   //data da cui inizia la ricorrenza
 
 public:
     //Costruttore
-    EventoRicorrente(unsigned int = 0,
-                     const QString& = "SCONOSCIUTO",
-                     const QString& = "SCONOSCIUTO",
-                     const QDateTime& = QDateTime(),
-                     const QString& = QString(),
-                    Frequenza = Frequenza::Nessuna,
-                     unsigned int = 0,
-                     bool = false);
+    EventoRicorrente(unsigned int id = 0,
+                     const QString& titolo = "SCONOSCIUTO",
+                     const QString& luogo = "SCONOSCIUTO",
+                     const QDateTime& orario = QDateTime(),
+                     const QString& descrizione = QString(),
+                     Frequenza frequenza = Frequenza::Nessuna,
+                     unsigned int numOccorrenze = 1,
+                     bool illimitata = false);
 
     //Costruttore di copia
     EventoRicorrente(const EventoRicorrente&);
@@ -33,21 +34,13 @@ public:
     Frequenza getFrequenza() const;
     unsigned int getNumOccorrenze() const;
     bool isIllimitata() const;
+    QDateTime getOrario() const override;
 
     //Metodi set
     void setFrequenza(Frequenza);
     void setNumOccorrenze(unsigned int);
     void setIllimitata(bool);
-
-    /*
-    //Metodo di clonazione per copia polimorfica
-    virtual EventoRicorrente* clone() const override;
-    */
-
-    /*
-    //accept per Visitor
-    virtual void accept(ActivityVisitorInterface&) const override;
-    */
+    void setOrario(const QDateTime&) override;
 };
 
 #endif // EVENTORICORRENTE_H

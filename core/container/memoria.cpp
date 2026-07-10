@@ -4,6 +4,7 @@
 void Memoria::aggiungi(std::unique_ptr<Attivita> attivita) {
     if (!attivita) return;
     memoriaAttivita.insert({attivita->getId(), std::move(attivita)});
+    modificheNonSalvate = true;
 }
 
 bool Memoria::rimuovi(const Attivita* attivita) {
@@ -12,7 +13,13 @@ bool Memoria::rimuovi(const Attivita* attivita) {
 }
 
 bool Memoria::rimuoviPerId(unsigned int idAttivita) {
-    return memoriaAttivita.erase(idAttivita) > 0;
+    auto risultato = memoriaAttivita.erase(idAttivita);
+
+    if (risultato > 0) {
+        modificheNonSalvate = true;
+        return true;
+    }
+    return false;
 }
 
 void Memoria::svuotaMemoria() {
@@ -25,20 +32,36 @@ bool Memoria::contieneId(unsigned int idAttivita) const {
 
 const Attivita* Memoria::cercaPerId(unsigned int idAttivita) const {
     auto it = memoriaAttivita.find(idAttivita);
+
     if (it != memoriaAttivita.end()) {
         return it->second.get();
     }
+
     return nullptr;
 }
 
 Attivita* Memoria::cercaPerId(unsigned int idAttivita) {
     auto it = memoriaAttivita.find(idAttivita);
+
     if (it != memoriaAttivita.end()) {
         return it->second.get();
     }
+
     return nullptr;
 }
 
 unsigned int Memoria::size() const {
     return static_cast<unsigned int>(memoriaAttivita.size());
+}
+
+bool Memoria::haModificheNonSalvate() const {
+    return modificheNonSalvate;
+}
+
+void Memoria::salvaEffettuato() {
+    modificheNonSalvate = false;
+}
+
+void Memoria::modificaEffettuata(){
+    modificheNonSalvate = true;
 }

@@ -17,11 +17,13 @@ SOURCES += \
     core/container/memoria.cpp \
     core/jsonIO/jsonParser.cpp \
     core/jsonIO/jsonIO.cpp \
+    test/testJsonIO.cpp \
     gui/mainwindow.cpp \
     gui/VistaElencoAttivita.cpp \
     gui/VistaDettaglioAttivita.cpp \
     gui/VistaEditorAttivita.cpp \
-    test/testJsonIO.cpp
+    gui/VistaEditorLista.cpp \
+    gui/VistaAiuto.cpp
 
 HEADERS += \
     core/gerarchia/attivita.h \
@@ -33,14 +35,17 @@ HEADERS += \
     core/container/memoria.h \
     core/jsonIO/jsonParser.h \
     core/jsonIO/jsonIO.h \
-    test/testJsonIO.h
-
-HEADERS += \
+    test/testJsonIO.h \
     gui/mainwindow.h \
     gui/VistaElencoAttivita.h \
     gui/VistaDettaglioAttivita.h \
-    gui/VistaEditorAttivita.h
+    gui/VistaEditorAttivita.h \
+    gui/VistaEditorLista.h \
+    gui/VistaAiuto.h
 
+RESOURCES += \
+    risorse.qrc
+    
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

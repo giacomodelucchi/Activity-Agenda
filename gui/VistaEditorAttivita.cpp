@@ -1,53 +1,43 @@
 #include "VistaEditorAttivita.h"
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QFormLayout>
-#include <QLineEdit>
-#include <QTextEdit>
-#include <QDateTime>
-#include <QDateTimeEdit>
-#include <QLabel>
-#include <QPushButton>
-#include <QTreeWidget>
-#include <QTreeWidgetItem>
-#include <QHeaderView>
-
-#include "../core/gerarchia/evento.h"
-#include "../core/gerarchia/eventoRicorrente.h"
-#include "../core/gerarchia/lista.h"
-#include "../core/gerarchia/voceLista.h"
-
 VistaEditorAttivita::VistaEditorAttivita(QWidget* parent)
     : QWidget(parent)
 {
     auto* mainLayout = new QVBoxLayout(this);
-    auto* formLayout = new QFormLayout();
+    formLayout = new QFormLayout();
 
     titleEdit = new QLineEdit(this);
     titleEdit->setPlaceholderText(tr("Titolo"));
+
     descriptionEdit = new QTextEdit(this);
     descriptionEdit->setPlaceholderText(tr("Descrizione"));
     descriptionEdit->setAcceptRichText(false);
+
     locationEdit = new QLineEdit(this);
     locationEdit->setPlaceholderText(tr("Luogo"));
+
     dateTimeEdit = new QDateTimeEdit(this);
     dateTimeEdit->setDisplayFormat("yyyy-MM-dd HH:mm");
     dateTimeEdit->setCalendarPopup(true);
 
-    itemsLabel = new QLabel(this);
-    itemList = new QTreeWidget(this);
-    itemList->setColumnCount(2);
-    itemList->setHeaderLabels({tr("Completata"), tr("Voce")});
-    itemList->setRootIsDecorated(false);
-    itemList->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    itemList->header()->setSectionResizeMode(QHeaderView::Stretch);
-    itemList->setVisible(false);
+    listaEditor = new VistaEditorLista(this);
+    listaEditor->hide();
+
+    frequenzaCombo = new QComboBox(this);
+    frequenzaCombo->addItem("Nessuna");
+    frequenzaCombo->addItem("Giornaliera");
+    frequenzaCombo->addItem("Settimanale");
+    frequenzaCombo->addItem("Mensile");
+    frequenzaCombo->addItem("Annuale");
+    numOccorrenzeSpin = new QSpinBox(this);
+    numOccorrenzeSpin->setMinimum(1);
+    numOccorrenzeSpin->setMaximum(1000);
+    illimitataCheck = new QCheckBox(tr("Ricorrenza illimitata"), this);
 
     saveButton = new QPushButton(tr("Salva"), this);
     cancelButton = new QPushButton(tr("Annulla"), this);
 
-    auto* buttonLayout = new QHBoxLayout();
+    QLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addWidget(saveButton);
     buttonLayout->addWidget(cancelButton);
 
@@ -55,10 +45,19 @@ VistaEditorAttivita::VistaEditorAttivita(QWidget* parent)
     formLayout->addRow(tr("Descrizione:"), descriptionEdit);
     formLayout->addRow(tr("Luogo:"), locationEdit);
     formLayout->addRow(tr("Orario:"), dateTimeEdit);
+    
+    formLayout->addRow(tr("Frequenza:"), frequenzaCombo);
+    formLayout->addRow(tr("Numero occorrenze:"), numOccorrenzeSpin);
+    formLayout->addRow("", illimitataCheck);
+    formLayout->labelForField(frequenzaCombo)->setVisible(false);
+    formLayout->labelForField(numOccorrenzeSpin)->setVisible(false);
+
+    frequenzaCombo->hide();
+    numOccorrenzeSpin->hide();
+    illimitataCheck->hide();
 
     mainLayout->addLayout(formLayout);
-    mainLayout->addWidget(itemsLabel);
-    mainLayout->addWidget(itemList);
+    mainLayout->addWidget(listaEditor);
     mainLayout->addLayout(buttonLayout);
 
     connect(saveButton, &QPushButton::clicked, this, &VistaEditorAttivita::onSave);
@@ -67,7 +66,8 @@ VistaEditorAttivita::VistaEditorAttivita(QWidget* parent)
     connect(descriptionEdit, &QTextEdit::textChanged, this, &VistaEditorAttivita::markDirty);
     connect(locationEdit, &QLineEdit::textChanged, this, &VistaEditorAttivita::markDirty);
     connect(dateTimeEdit, &QDateTimeEdit::dateTimeChanged, this, &VistaEditorAttivita::markDirty);
-    connect(itemList, &QTreeWidget::itemChanged, this, &VistaEditorAttivita::markDirty);
+    connect(listaEditor, &VistaEditorLista::modified, this, &VistaEditorAttivita::markDirty);
+    connect(illimitataCheck, &QCheckBox::toggled, numOccorrenzeSpin, &QSpinBox::setDisabled);
 }
 
 void VistaEditorAttivita::editActivity(Attivita* a)
@@ -75,29 +75,21 @@ void VistaEditorAttivita::editActivity(Attivita* a)
     current = a;
     dirty = false;
 
-    if (!a) {
-        titleEdit->clear();
-        descriptionEdit->clear();
-        descriptionEdit->setVisible(true);
-        locationEdit->clear();
-        dateTimeEdit->setDateTime(QDateTime::currentDateTime());
-        itemList->clear();
-        itemsLabel->clear();
-        itemList->setVisible(false);
-        saveButton->setEnabled(false);
-        cancelButton->setEnabled(false);
-        dirty = false;
-        return;
-    }
+    // nasconde i campi specifici per di EventoRicorrente e Lista
+    formLayout->labelForField(frequenzaCombo)->hide();
+    frequenzaCombo->hide();
+    formLayout->labelForField(numOccorrenzeSpin)->hide();
+    numOccorrenzeSpin->hide();
+    illimitataCheck->hide();
+    listaEditor->hide();
 
+    // Popola i campi dell'editor con i dati dell'attività corrente
     titleEdit->setText(a->getTitolo());
-    descriptionEdit->setVisible(true);
+    formLayout->labelForField(descriptionEdit)->show();
+    descriptionEdit->show();
     descriptionEdit->clear();
     locationEdit->clear();
     dateTimeEdit->setDateTime(QDateTime::currentDateTime());
-    itemList->clear();
-    itemList->setVisible(false);
-    itemsLabel->clear();
     saveButton->setEnabled(true);
     cancelButton->setEnabled(true);
 
@@ -105,26 +97,26 @@ void VistaEditorAttivita::editActivity(Attivita* a)
         descriptionEdit->setText(er->getDescrizione());
         locationEdit->setText(er->getLuogo());
         dateTimeEdit->setDateTime(er->getOrario());
-        itemsLabel->setText(tr("Modifica i dettagli dell'evento ricorrente."));
+        frequenzaCombo->setCurrentIndex(static_cast<int>(er->getFrequenza()));
+        numOccorrenzeSpin->setValue(er->getNumOccorrenze());
+        illimitataCheck->setChecked(er->isIllimitata());
+        
+        formLayout->labelForField(frequenzaCombo)->show();
+        frequenzaCombo->show();
+        formLayout->labelForField(numOccorrenzeSpin)->show();
+        numOccorrenzeSpin->show();
+        illimitataCheck->show();
+
     } else if (const Evento* ev = dynamic_cast<const Evento*>(a)) {
         descriptionEdit->setText(ev->getDescrizione());
         locationEdit->setText(ev->getLuogo());
         dateTimeEdit->setDateTime(ev->getOrario());
-        itemsLabel->setText(tr("Modifica i dettagli dell'evento."));
-    } else if (const Lista* lista = dynamic_cast<const Lista*>(a)) {
-        descriptionEdit->setVisible(false);
-        locationEdit->setText(lista->getLuogo());
-        dateTimeEdit->setDateTime(lista->getOrario().isValid() ? lista->getOrario() : QDateTime::currentDateTime());
-        itemsLabel->setText(tr("Elementi della lista (solo visualizzazione)."));
-        itemList->setVisible(true);
-        itemList->clear();
-        for (unsigned int i = 0; i < lista->numeroVoci(); ++i) {
-            const VoceLista& voce = lista->getVoce(i);
-            auto* item = new QTreeWidgetItem(itemList);
-            item->setText(1, voce.getTesto());
-            item->setCheckState(0, voce.isCompletata() ? Qt::Checked : Qt::Unchecked);
-            item->setFlags(item->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
-        }
+
+    } else if (Lista* lista = dynamic_cast<Lista*>(a)) {
+        formLayout->labelForField(descriptionEdit)->hide();
+        descriptionEdit->hide();
+        listaEditor->setLista(lista);
+        listaEditor->show();
     } else {
         descriptionEdit->setVisible(true);
     }
@@ -135,7 +127,15 @@ void VistaEditorAttivita::onSave()
     if (!current) return;
     current->setTitolo(titleEdit->text());
 
-    if (auto* ev = dynamic_cast<Evento*>(current)) {
+    if (auto* er = dynamic_cast<EventoRicorrente*>(current)) {
+        er->setDescrizione(descriptionEdit->toPlainText());
+        er->setLuogo(locationEdit->text());
+        er->setOrario(dateTimeEdit->dateTime());
+        er->setFrequenza(static_cast<Frequenza>(frequenzaCombo->currentIndex()));
+        er->setNumOccorrenze(numOccorrenzeSpin->value());
+        er->setIllimitata(illimitataCheck->isChecked());
+    }
+    else if (auto* ev = dynamic_cast<Evento*>(current)) {
         ev->setDescrizione(descriptionEdit->toPlainText());
         ev->setLuogo(locationEdit->text());
         ev->setOrario(dateTimeEdit->dateTime());
@@ -143,10 +143,6 @@ void VistaEditorAttivita::onSave()
     if (auto* lista = dynamic_cast<Lista*>(current)) {
         lista->setLuogo(locationEdit->text());
         lista->setOrario(dateTimeEdit->dateTime());
-        for (int i = 0; i < itemList->topLevelItemCount(); ++i) {
-            QTreeWidgetItem* item = itemList->topLevelItem(i);
-            lista->setStatoVoce(static_cast<unsigned int>(i), item->checkState(0) == Qt::Checked);
-        }
     }
 
     dirty = false;

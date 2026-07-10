@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
     runJsonIOTest("test_activities.json");
     return 0;
     */
+    a.setWindowIcon(QIcon(":/resources/icon.ico"));
 
     MainWindow w;
     w.show();
