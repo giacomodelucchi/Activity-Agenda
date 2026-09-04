@@ -47,6 +47,12 @@ VistaDettaglioAttivita::VistaDettaglioAttivita(QWidget* parent)
     connect(backButton, &QPushButton::clicked, this, &VistaDettaglioAttivita::onBack);
 }
 
+//se il campo è vuoto, mostra un testo di default
+QString VistaDettaglioAttivita::placeholder(const QString& value) const
+{
+    return value.trimmed().isEmpty()? tr("Non specificato"): value;
+}
+
 void VistaDettaglioAttivita::setActivity(const Attivita* a)
 {
     current = a;
@@ -57,54 +63,10 @@ void VistaDettaglioAttivita::setActivity(const Attivita* a)
         deleteButton->setEnabled(false);
         return;
     }
-
-    auto placeholder = [this](const QString& value){
-        return value.trimmed().isEmpty() ? tr("Non specificato") : value;
-    };
-
-    titleLabel->setText(placeholder(a->getTitolo()));
+    titleLabel->setText(a->getTitolo());
     editButton->setEnabled(true);
     deleteButton->setEnabled(true);
-
-    //costruzione della stringa contenente i dettagli dell'attività
-    QString details;
-    if (const EventoRicorrente* er = dynamic_cast<const EventoRicorrente*>(a)) {
-        details += tr("Tipo: Ricorrenza\n");
-        details += tr("Luogo: %1\n").arg(placeholder(er->getLuogo()));
-        details += tr("Orario: %1\n").arg(er->getOrario().isValid()
-            ? QLocale::system().toString(er->getOrario(), QLocale::ShortFormat)
-            : tr("Non specificato"));
-        details += tr("Descrizione: %1\n").arg(placeholder(er->getDescrizione()));
-        details += tr("Frequenza: %1\n").arg(JsonParser::frequenzaToString(er->getFrequenza()));
-        if (er->isIllimitata()){
-            details += tr("Ricorrenza illimitata\n");
-        }
-        else{
-            details += tr("Numero di occorrenze: %1\n").arg(er->getNumOccorrenze());
-        }
-    } else if (const Evento* ev = dynamic_cast<const Evento*>(a)) {
-        details += tr("Tipo: Evento\n");
-        details += tr("Luogo: %1\n").arg(placeholder(ev->getLuogo()));
-        details += tr("Orario: %1\n").arg(ev->getOrario().isValid()
-            ? QLocale::system().toString(ev->getOrario(), QLocale::ShortFormat)
-            : tr("Non specificato"));
-        details += tr("Descrizione: %1").arg(placeholder(ev->getDescrizione()));
-    } else if (const Lista* lista = dynamic_cast<const Lista*>(a)) {
-        details += tr("Tipo: Lista\n");
-        details += tr("Luogo: %1\n").arg(placeholder(lista->getLuogo()));
-        details += tr("Orario: %1\n").arg(lista->getOrario().isValid()
-            ? QLocale::system().toString(lista->getOrario(), QLocale::ShortFormat)
-            : tr("Non specificato"));
-        details += tr("Voci (%1):\n").arg(lista->numeroVoci());
-        for (unsigned int i = 0; i < lista->numeroVoci(); ++i) {
-            const VoceLista& voce = lista->getVoce(i);
-            details += QString("  %1 %2\n").arg(voce.isCompletata() ? QChar(0x2714) : QChar(0x2610)).arg(voce.getTesto().isEmpty() ? tr("Non specificato") : voce.getTesto());
-        }
-    } else {
-        details += tr("Tipo: Attività generica\n");
-    }
-
-    detailsLabel->setText(details);
+    current->accept(*this);
 }
 
 void VistaDettaglioAttivita::onEdit()
@@ -123,3 +85,63 @@ void VistaDettaglioAttivita::onBack()
 {
     emit backRequested();
 }
+
+/*
+==============================================================================================
+Implementazione dei metodi del Visitor per la visualizzazione dei dettagli delle attività
+==============================================================================================
+*/
+
+void VistaDettaglioAttivita::visit(const Evento& evento){
+    QString testo;
+
+    testo += tr("<b>Tipo:</b> Evento<br>");
+    testo += tr("<b>Titolo:</b> %1<br>").arg(placeholder(evento.getTitolo()));
+    testo += tr("<b>Luogo:</b> %1<br>").arg(placeholder(evento.getLuogo()));
+    QDateTime orario = evento.getOrario();
+    testo += tr("<b>Orario:</b> %1<br>").arg(orario.isValid() ? QLocale::system().toString(orario, QLocale::ShortFormat) : tr("Non specificato"));
+    testo += tr("<b>Descrizione:</b> %1").arg(placeholder(evento.getDescrizione()));
+
+    detailsLabel->setText(testo);
+}
+
+void VistaDettaglioAttivita::visit(const EventoRicorrente& evento){
+    QString testo;
+
+    testo += tr("<b>Tipo:</b> Ricorrenza<br>");
+    testo += tr("<b>Titolo:</b> %1<br>").arg(placeholder(evento.getTitolo()));
+    testo += tr("<b>Luogo:</b> %1<br>").arg(placeholder(evento.getLuogo()));
+    QDateTime orario = evento.getOrario();
+    testo += tr("<b>Orario:</b> %1<br>").arg(orario.isValid()? QLocale::system().toString(orario, QLocale::ShortFormat) : tr("Non specificato"));
+    testo += tr("<b>Descrizione:</b> %1<br>").arg(placeholder(evento.getDescrizione()));
+    testo += tr("<b>Frequenza:</b> %1<br>").arg(frequenzaToString(evento.getFrequenza()));
+
+    if (evento.isIllimitata()) {
+        testo += tr("<b>Occorrenze:</b> Illimitate");
+    } else {
+        testo += tr("<b>Occorrenze:</b> %1").arg(evento.getNumOccorrenze());
+    }
+
+    detailsLabel->setText(testo);
+}
+
+void VistaDettaglioAttivita::visit(const Lista& lista){
+    QString testo;
+
+    testo += tr("<b>Tipo:</b> Lista<br>");
+    testo += tr("<b>Titolo:</b> %1<br>").arg(placeholder(lista.getTitolo()));
+    testo += tr("<b>Luogo:</b> %1<br>").arg(placeholder(lista.getLuogo()));
+    testo += tr("<b>Elementi:</b><br>");
+
+    for (unsigned int i = 0; i < lista.numeroVoci(); ++i) {
+        const VoceLista& voce = lista.getVoce(i);
+
+        testo += QString("%1. %2%3<br>")
+                     .arg(i + 1)
+                     .arg(voce.getTesto())
+                     .arg(voce.isCompletata() ? tr(" ✓") : "");
+    }
+
+    detailsLabel->setText(testo);
+}
+

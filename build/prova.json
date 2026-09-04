@@ -1,0 +1,46 @@
+[
+    {
+        "descrizione": "sadsasd",
+        "id": 1,
+        "luogo": "dasd",
+        "orario": "2026-09-04T14:53:20",
+        "tipo": "Evento",
+        "titolo": "dasds"
+    },
+    {
+        "descrizione": "fsdafddsa",
+        "frequenza": "Giornaliera",
+        "id": 2,
+        "illimitata": false,
+        "luogo": "dsfafdsaf",
+        "numOccorrenze": 5,
+        "orario": "2026-09-05T14:53:29",
+        "tipo": "EventoRicorrente",
+        "titolo": "sdafdas"
+    },
+    {
+        "elementi": [
+            {
+                "completata": false,
+                "testo": "asdvsa"
+            },
+            {
+                "completata": true,
+                "testo": "vasdva"
+            },
+            {
+                "completata": true,
+                "testo": "vsavda"
+            },
+            {
+                "completata": false,
+                "testo": "sdvsdva"
+            }
+        ],
+        "id": 3,
+        "luogo": "vsavas",
+        "orario": "2026-09-19T14:53:40",
+        "tipo": "Lista",
+        "titolo": "savad"
+    }
+]

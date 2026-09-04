@@ -5,6 +5,8 @@
 #include "frequenza.h"
 #include <QString>
 #include <QDateTime>
+#include "attivitaVisitor.h"
+#include "attivitaConstVisitor.h"
 
 class EventoRicorrente : public Evento {
 private:
@@ -29,6 +31,10 @@ public:
 
     //Distruttore virtuale
     ~EventoRicorrente() override;
+
+    //Visitor
+    void accept(AttivitaVisitor&) override;
+    void accept(AttivitaConstVisitor&) const override;
 
     //Metodi get
     Frequenza getFrequenza() const;

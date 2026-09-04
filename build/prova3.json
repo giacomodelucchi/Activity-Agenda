@@ -1,0 +1,30 @@
+[
+    {
+        "descrizione": "",
+        "id": 1,
+        "luogo": "",
+        "orario": "2026-09-04T18:25:48",
+        "tipo": "Evento",
+        "titolo": ""
+    },
+    {
+        "descrizione": "",
+        "frequenza": "Nessuna",
+        "id": 2,
+        "illimitata": false,
+        "luogo": "",
+        "numOccorrenze": 1,
+        "orario": "2026-09-04T18:25:52",
+        "tipo": "EventoRicorrente",
+        "titolo": ""
+    },
+    {
+        "elementi": [
+        ],
+        "id": 3,
+        "luogo": "",
+        "orario": "2026-09-04T18:25:55",
+        "tipo": "Lista",
+        "titolo": ""
+    }
+]

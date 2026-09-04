@@ -18,10 +18,20 @@ EventoRicorrente::EventoRicorrente(unsigned int id,
 
 //Costruttore di copia
 EventoRicorrente::EventoRicorrente(const EventoRicorrente& er)
-    : Evento(er), frequenza(er.frequenza), numOccorrenze(er.numOccorrenze), illimitata(er.illimitata){}
+    : Evento(er), frequenza(er.frequenza), numOccorrenze(er.numOccorrenze), illimitata(er.illimitata), dataInizio(er.dataInizio){}
 
 //Distruttore virtuale
 EventoRicorrente::~EventoRicorrente() = default;
+
+// Visitor
+void EventoRicorrente::accept(AttivitaVisitor& visitor) {
+    visitor.visit(*this);
+}
+
+void EventoRicorrente::accept(AttivitaConstVisitor& visitor) const
+{
+    visitor.visit(*this);
+}
 
 //Metodi get
 Frequenza EventoRicorrente::getFrequenza() const{

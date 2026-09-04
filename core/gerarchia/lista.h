@@ -3,6 +3,8 @@
 
 #include "attivita.h"
 #include "voceLista.h"
+#include "attivitaVisitor.h"
+#include "attivitaConstVisitor.h"
 
 #include <QString>
 #include <QVector>
@@ -21,6 +23,10 @@ public:
 
     Lista(const Lista&);
     ~Lista() override;
+
+    //Visitor
+    void accept(AttivitaVisitor&) override;
+    void accept(AttivitaConstVisitor&) const override;
 
     unsigned int numeroVoci() const;
     const VoceLista& getVoce(unsigned int indice) const;

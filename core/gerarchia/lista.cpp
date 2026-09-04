@@ -19,6 +19,17 @@ Lista::Lista(const Lista& l)
 //Distruttore virtuale
 Lista::~Lista() = default;
 
+// Visitor
+void Lista::accept(AttivitaVisitor& visitor)
+{
+    visitor.visit(*this);
+}
+
+void Lista::accept(AttivitaConstVisitor& visitor) const
+{
+    visitor.visit(*this);
+}
+
 //Metodi set
 void Lista::setElementi(const QVector<VoceLista>& newElementi){
     elementi = newElementi;

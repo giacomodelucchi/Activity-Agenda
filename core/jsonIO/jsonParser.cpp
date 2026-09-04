@@ -4,28 +4,41 @@
 #include <QDateTime>
 #include <QJsonValue>
 
-// Costruttore (istanza opzionale)
+//Costruttore
 JsonParser::JsonParser(const QString& source)
     : source(source) {}
 
-// API pubblica
-QJsonObject JsonParser::AttivitaToJson(const Attivita& att) {
-    // ordine: controlla prima le sottoclassi più specifiche
-    if (auto er = dynamic_cast<const EventoRicorrente*>(&att)) {
-        return eventoRicorrenteToJson(*er);
-    }
-    if (auto e = dynamic_cast<const Evento*>(&att)) {
-        return eventoToJson(*e);
-    }
-    if (auto l = dynamic_cast<const Lista*>(&att)) {
-        return listaToJson(*l);
-    }
-
-    // se il tipo di Attivita non è riconosciuto, ritorna un oggetto JSON vuoto
-    qWarning() << "JsonParser::AttivitaToJson: tipo Attivita non riconosciuto";
-    return QJsonObject();
+// ============================================================
+// VISITOR
+// ============================================================
+void JsonParser::visit(const Evento& evento){
+    result = eventoToJson(evento);
 }
 
+void JsonParser::visit(const EventoRicorrente& evento){
+    result = eventoRicorrenteToJson(evento);
+}
+
+void JsonParser::visit(const Lista& lista){
+    result = listaToJson(lista);
+}
+
+
+// ============================================================
+// API PUBBLICA
+// ============================================================
+
+// costruisce un QJsonObject a partire da un'Attivita
+QJsonObject JsonParser::AttivitaToJson(const Attivita& att) {
+    JsonParser parser;
+
+    // Il polimorfismo decide quale visit() chiamare.
+    att.accept(parser);
+
+    return parser.result;
+}
+
+// costruisce un'Attivita a partire da un QJsonObject
 std::unique_ptr<Attivita> JsonParser::JsonToAttivita(const QJsonObject& obj) {
     const QString tipo = obj.value("tipo").toString();
     if (tipo == "EventoRicorrente") return jsonToEventoRicorrente(obj);
@@ -37,7 +50,10 @@ std::unique_ptr<Attivita> JsonParser::JsonToAttivita(const QJsonObject& obj) {
     return nullptr;
 }
 
-// Serializzazione specifica per tipo di Attivita
+// ============================================================
+// SERIALIZZAZIONE
+// ============================================================
+
 QJsonObject JsonParser::eventoToJson(const Evento& evento) {
     QJsonObject obj;
     obj["tipo"] = "Evento";
@@ -81,7 +97,10 @@ QJsonObject JsonParser::voceListaToJson(const VoceLista& voce) {
     return obj;
 }
 
-// Deserializzazione specifica
+// ============================================================
+// DESERIALIZZAZIONE
+// ============================================================
+
 std::unique_ptr<Attivita> JsonParser::jsonToEvento(const QJsonObject& obj) {
     unsigned int id = static_cast<unsigned int>(obj.value("id").toInt());
     QString titolo = obj.value("titolo").toString();

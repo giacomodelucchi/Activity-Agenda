@@ -148,17 +148,12 @@ void VistaElencoAttivita::refreshList()
         QString tipo = tr("Attività");
         QColor bgColor = QColor(255, 240, 220);
 
-        //personalizzazione a seconda del tipo di attività
-        if (dynamic_cast<const EventoRicorrente*>(&a)) {
-            bgColor = QColor(220, 255, 220);
-            tipo = tr("Ricorrenza");
-        } else if (dynamic_cast<const Evento*>(&a)) {
-            bgColor = QColor(220, 235, 255);
-            tipo = tr("Evento");
-        } else if (dynamic_cast<const Lista*>(&a)) {
-            bgColor = QColor(255, 240, 220);
-            tipo = tr("Lista");
-        }      
+        //colorazione e tipo specifici a seconda del tipo di attività, tramite il Visitor
+        tipoAttivita.clear();
+        coloreAttivita = QColor();
+        a.accept(*this);
+        if (!tipoAttivita.isEmpty()) tipo = tipoAttivita;
+        if (coloreAttivita.isValid()) bgColor = coloreAttivita;
 
         OrdinalTreeWidgetItem* item = new OrdinalTreeWidgetItem(list);  // OrdinalTreeWidgetItem per ordinamento personalizzato
 
@@ -254,4 +249,23 @@ void VistaElencoAttivita::clearSelection()
 {
     list->clearSelection();
     deleteButton->setEnabled(false);
+}
+/*
+==============================================================================================
+Implementazione dei metodi del Visitor per la diversa colorazione delle righe della tabella a seconda del tipo di attività
+==============================================================================================
+*/
+void VistaElencoAttivita::visit(const Evento&){
+    tipoAttivita = tr("Evento");
+    coloreAttivita = QColor(220, 235, 255);
+}
+
+void VistaElencoAttivita::visit(const EventoRicorrente&){
+    tipoAttivita = tr("Ricorrenza");
+    coloreAttivita = QColor(220, 255, 220);
+}
+
+void VistaElencoAttivita::visit(const Lista&){
+    tipoAttivita = tr("Lista");
+    coloreAttivita = QColor(255, 240, 220);
 }

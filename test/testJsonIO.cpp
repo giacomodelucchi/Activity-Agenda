@@ -10,6 +10,79 @@
 #include <QTime>
 #include <QVector>
 
+namespace {
+class ActivityVerifier : public AttivitaConstVisitor {
+public:
+    enum class ExpectedType { Evento, EventoRicorrente, Lista };
+
+    ActivityVerifier(ExpectedType expectedType,
+                     const QString& expectedTitolo,
+                     const QString& expectedLuogo,
+                     const QDateTime& expectedOrario,
+                     const QString& expectedDescrizione = QString(),
+                     Frequenza expectedFrequenza = Frequenza::Nessuna,
+                     unsigned int expectedNumOccorrenze = 0,
+                     bool expectedIllimitata = false,
+                     const QVector<VoceLista>& expectedElementi = {})
+        : expectedType(expectedType),
+          expectedTitolo(expectedTitolo),
+          expectedLuogo(expectedLuogo),
+          expectedOrario(expectedOrario),
+          expectedDescrizione(expectedDescrizione),
+          expectedFrequenza(expectedFrequenza),
+          expectedNumOccorrenze(expectedNumOccorrenze),
+          expectedIllimitata(expectedIllimitata),
+          expectedElementi(expectedElementi) {}
+
+    void visit(const Evento& evento) override {
+        matches = expectedType == ExpectedType::Evento
+            && evento.getTitolo() == expectedTitolo
+            && evento.getLuogo() == expectedLuogo
+            && evento.getOrario() == expectedOrario
+            && evento.getDescrizione() == expectedDescrizione;
+    }
+
+    void visit(const EventoRicorrente& evento) override {
+        matches = expectedType == ExpectedType::EventoRicorrente
+            && evento.getTitolo() == expectedTitolo
+            && evento.getLuogo() == expectedLuogo
+            && evento.getOrario() == expectedOrario
+            && evento.getDescrizione() == expectedDescrizione
+            && evento.getFrequenza() == expectedFrequenza
+            && evento.getNumOccorrenze() == expectedNumOccorrenze
+            && evento.isIllimitata() == expectedIllimitata;
+    }
+
+    void visit(const Lista& lista) override {
+        matches = expectedType == ExpectedType::Lista
+            && lista.getTitolo() == expectedTitolo
+            && lista.getLuogo() == expectedLuogo
+            && lista.getOrario() == expectedOrario
+            && lista.numeroVoci() == static_cast<unsigned int>(expectedElementi.size());
+
+        for (unsigned int i = 0; matches && i < lista.numeroVoci(); ++i) {
+            const VoceLista& expectedVoce = expectedElementi[static_cast<int>(i)];
+            const VoceLista& actualVoce = lista.getVoce(i);
+            matches = expectedVoce.getTesto() == actualVoce.getTesto()
+                && expectedVoce.isCompletata() == actualVoce.isCompletata();
+        }
+    }
+
+    bool matches = false;
+
+private:
+    ExpectedType expectedType;
+    QString expectedTitolo;
+    QString expectedLuogo;
+    QDateTime expectedOrario;
+    QString expectedDescrizione;
+    Frequenza expectedFrequenza;
+    unsigned int expectedNumOccorrenze;
+    bool expectedIllimitata;
+    QVector<VoceLista> expectedElementi;
+};
+}
+
 bool runJsonIOTest(const QString& jsonFilePath) {
     const unsigned int idEvento = 1;
     const unsigned int idEventoRicorrente = 2;
@@ -81,55 +154,48 @@ bool runJsonIOTest(const QString& jsonFilePath) {
     }
 
     const Attivita* a1 = caricata.cercaPerId(idEvento);
-    const Evento* e1 = dynamic_cast<const Evento*>(a1);
-    if (!e1) {
-        qWarning() << "runJsonIOTest: evento 1 non trovato o cast fallito";
+    ActivityVerifier eventoVerifier(
+        ActivityVerifier::ExpectedType::Evento,
+        titoloEvento, luogoEvento, orarioEvento, descrizioneEvento);
+    if (!a1) {
+        qWarning() << "runJsonIOTest: evento 1 non trovato";
         return false;
     }
-    if (e1->getTitolo() != titoloEvento || e1->getLuogo() != luogoEvento || e1->getOrario() != orarioEvento || e1->getDescrizione() != descrizioneEvento) {
+    a1->accept(eventoVerifier);
+    if (!eventoVerifier.matches) {
         qWarning() << "runJsonIOTest: evento 1 dati errati";
-        qWarning() << "atteso:" << titoloEvento << luogoEvento << orarioEvento.toString(Qt::ISODate) << descrizioneEvento;
-        qWarning() << "trovato:" << e1->getTitolo() << e1->getLuogo() << e1->getOrario().toString(Qt::ISODate) << e1->getDescrizione();
         return false;
     }
 
     const Attivita* a2 = caricata.cercaPerId(idEventoRicorrente);
-    const EventoRicorrente* er2 = dynamic_cast<const EventoRicorrente*>(a2);
-    if (!er2) {
-        qWarning() << "runJsonIOTest: evento ricorrente 2 non trovato o cast fallito";
+    ActivityVerifier ricorrenteVerifier(
+        ActivityVerifier::ExpectedType::EventoRicorrente,
+        titoloEventoRicorrente, luogoEventoRicorrente, orarioEventoRicorrente,
+        descrizioneEventoRicorrente, frequenzaRicorrente,
+        numOccorrenzeRicorrente, illimitataRicorrente);
+    if (!a2) {
+        qWarning() << "runJsonIOTest: evento ricorrente 2 non trovato";
         return false;
     }
-    if (er2->getTitolo() != titoloEventoRicorrente || er2->getLuogo() != luogoEventoRicorrente || er2->getOrario() != orarioEventoRicorrente || er2->getDescrizione() != descrizioneEventoRicorrente
-        || er2->getFrequenza() != frequenzaRicorrente || er2->getNumOccorrenze() != numOccorrenzeRicorrente || er2->isIllimitata() != illimitataRicorrente) {
+    a2->accept(ricorrenteVerifier);
+    if (!ricorrenteVerifier.matches) {
         qWarning() << "runJsonIOTest: evento ricorrente 2 dati errati";
-        qWarning() << "atteso:" << titoloEventoRicorrente << luogoEventoRicorrente << orarioEventoRicorrente.toString(Qt::ISODate)
-                   << descrizioneEventoRicorrente << frequenzaToString(frequenzaRicorrente) << numOccorrenzeRicorrente << illimitataRicorrente;
-        qWarning() << "trovato:" << er2->getTitolo() << er2->getLuogo() << er2->getOrario().toString(Qt::ISODate)
-                   << er2->getDescrizione() << frequenzaToString(er2->getFrequenza()) << er2->getNumOccorrenze() << er2->isIllimitata();
         return false;
     }
 
     const Attivita* a3 = caricata.cercaPerId(idLista);
-    const Lista* l3 = dynamic_cast<const Lista*>(a3);
-    if (!l3) {
-        qWarning() << "runJsonIOTest: lista 3 non trovata o cast fallito";
+    ActivityVerifier listaVerifier(
+        ActivityVerifier::ExpectedType::Lista,
+        titoloLista, luogoLista, orarioLista, QString(), Frequenza::Nessuna,
+        0, false, elementi);
+    if (!a3) {
+        qWarning() << "runJsonIOTest: lista 3 non trovata";
         return false;
     }
-    if (l3->getTitolo() != titoloLista || l3->getLuogo() != luogoLista || l3->getOrario() != orarioLista || l3->numeroVoci() != static_cast<unsigned int>(elementi.size())) {
+    a3->accept(listaVerifier);
+    if (!listaVerifier.matches) {
         qWarning() << "runJsonIOTest: lista 3 dati errati";
-        qWarning() << "atteso:" << titoloLista << luogoLista << orarioLista.toString(Qt::ISODate) << elementi.size();
-        qWarning() << "trovato:" << l3->getTitolo() << l3->getLuogo() << l3->getOrario().toString(Qt::ISODate) << l3->numeroVoci();
         return false;
-    }
-    for (unsigned int i = 0; i < elementi.size(); ++i) {
-        const VoceLista& expectedVoce = elementi[static_cast<int>(i)];
-        const VoceLista& actualVoce = l3->getVoce(i);
-        if (expectedVoce.getTesto() != actualVoce.getTesto() || expectedVoce.isCompletata() != actualVoce.isCompletata()) {
-            qWarning() << "runJsonIOTest: voce lista" << i << "diversa";
-            qWarning() << "atteso:" << expectedVoce.getTesto() << expectedVoce.isCompletata();
-            qWarning() << "trovato:" << actualVoce.getTesto() << actualVoce.isCompletata();
-            return false;
-        }
     }
 
     qDebug() << "runJsonIOTest: OK";

@@ -4,6 +4,8 @@
 #include "attivita.h"
 #include <QString>
 #include <QDateTime>
+#include "attivitaVisitor.h"
+#include "attivitaConstVisitor.h"
 
 class Evento : public Attivita {
 private:
@@ -23,6 +25,10 @@ public:
 
     //Distruttore virtuale
     ~Evento() override;
+
+    //Visitor
+    void accept(AttivitaVisitor&) override;
+    void accept(AttivitaConstVisitor&) const override;
 
     //Metodi get
     QString getDescrizione() const;

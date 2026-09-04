@@ -2,6 +2,8 @@
 #define JSONPARSER_H
 
 #include "../container/memoria.h"
+#include "../gerarchia/attivitaConstVisitor.h"
+
 #include <memory>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -13,9 +15,10 @@
 #include "../gerarchia/lista.h"
 #include "../gerarchia/voceLista.h"
 
-class JsonParser{
+class JsonParser : public AttivitaConstVisitor {
 private:
     QString source; //indirizzo del file JSON da cui leggere o scrivere
+    QJsonObject result; //risultato prodotto dal visitor
     
     static QJsonObject eventoToJson(const Evento&);
     static QJsonObject eventoRicorrenteToJson(const EventoRicorrente&);
@@ -36,6 +39,11 @@ private:
 
     static QString frequenzaToString(Frequenza);    
     static Frequenza stringToFrequenza(const QString&);
+
+    //Implementazione del Visitor
+    void visit(const Evento&) override;
+    void visit(const EventoRicorrente&) override;
+    void visit(const Lista&) override;
 };
 
 #endif // JSONPARSER_H

@@ -12,8 +12,9 @@ class QPushButton;
 class QToolButton;
 
 #include "../core/container/memoria.h"
+#include "../core/gerarchia/attivitaConstVisitor.h"
 
-class VistaElencoAttivita : public QWidget {
+class VistaElencoAttivita : public QWidget, public AttivitaConstVisitor {
     Q_OBJECT
 
 private:
@@ -24,6 +25,9 @@ private:
     QPushButton* deleteButton = nullptr;
     QToolButton* addButton = nullptr;
 
+    // Risultato della visita corrente
+    QString tipoAttivita;
+    QColor coloreAttivita;
 public:
     enum ActivityType { // serve per distinguere i tipi di attività quando si aggiunge una nuova attività
         TipoEvento = 0,
@@ -36,6 +40,11 @@ public:
     void refreshList();
     QVector<unsigned int> selectedActivityIds() const;
     void clearSelection();
+
+    //Visitor
+    void visit(const Evento&) override;
+    void visit(const EventoRicorrente&) override;
+    void visit(const Lista&) override;
 
 signals:
     void activitySelected(unsigned int id);

@@ -32,6 +32,8 @@ HEADERS += \
     core/gerarchia/lista.h \
     core/gerarchia/voceLista.h \
     core/gerarchia/frequenza.h \
+    core/gerarchia/attivitaVisitor.h \
+    core/gerarchia/attivitaConstVisitor.h \
     core/container/memoria.h \
     core/jsonIO/jsonParser.h \
     core/jsonIO/jsonIO.h \

@@ -20,13 +20,19 @@
 #include "../core/gerarchia/eventoRicorrente.h"
 #include "../core/gerarchia/lista.h"
 #include "VistaEditorLista.h"
+#include "../core/gerarchia/attivitaVisitor.h"
 
-class VistaEditorAttivita : public QWidget {
+class VistaEditorAttivita : public QWidget, public AttivitaVisitor {
     Q_OBJECT
 public:
     explicit VistaEditorAttivita(QWidget* parent = nullptr);
     void editActivity(Attivita* a);
     bool hasUnsavedChanges() const;
+
+    //Visitor
+    void visit(Evento&) override;
+    void visit(EventoRicorrente&) override;
+    void visit(Lista&) override;
 
 signals:
     void saved(unsigned int id);
@@ -35,9 +41,16 @@ signals:
 private slots:
     void onSave();
     void onCancel();
-    void markDirty();
+    void markDirty();   //segnala che l'editor ha modifiche non salvate rispetto all'attività visuallizzata
 
 private:
+    enum class VisitorMode {
+        Loading,
+        Saving
+    };
+        
+    VisitorMode visitorMode = VisitorMode::Loading;   //per distinguere se l'editor sta caricando i dati dell'attività corrente o salvando le modifiche apportate dall'utente
+
     QFormLayout* formLayout = nullptr;
     Attivita* current = nullptr;        //attività che sta venendo modificata nell'editor
     

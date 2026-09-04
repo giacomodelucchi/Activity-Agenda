@@ -1,8 +1,6 @@
 #include "VistaEditorAttivita.h"
 
-VistaEditorAttivita::VistaEditorAttivita(QWidget* parent)
-    : QWidget(parent)
-{
+VistaEditorAttivita::VistaEditorAttivita(QWidget* parent): QWidget(parent){
     auto* mainLayout = new QVBoxLayout(this);
     formLayout = new QFormLayout();
 
@@ -70,8 +68,9 @@ VistaEditorAttivita::VistaEditorAttivita(QWidget* parent)
     connect(illimitataCheck, &QCheckBox::toggled, numOccorrenzeSpin, &QSpinBox::setDisabled);
 }
 
-void VistaEditorAttivita::editActivity(Attivita* a)
-{
+void VistaEditorAttivita::editActivity(Attivita* a){
+    if (!a) return;
+
     current = a;
     dirty = false;
 
@@ -83,7 +82,7 @@ void VistaEditorAttivita::editActivity(Attivita* a)
     illimitataCheck->hide();
     listaEditor->hide();
 
-    // Popola i campi dell'editor con i dati dell'attività corrente
+    // Popola i campi comuni dell'editor con i dati dell'attività corrente
     titleEdit->setText(a->getTitolo());
     formLayout->labelForField(descriptionEdit)->show();
     descriptionEdit->show();
@@ -93,76 +92,84 @@ void VistaEditorAttivita::editActivity(Attivita* a)
     saveButton->setEnabled(true);
     cancelButton->setEnabled(true);
 
-    if (const EventoRicorrente* er = dynamic_cast<const EventoRicorrente*>(a)) {
-        descriptionEdit->setText(er->getDescrizione());
-        locationEdit->setText(er->getLuogo());
-        dateTimeEdit->setDateTime(er->getOrario());
-        frequenzaCombo->setCurrentIndex(static_cast<int>(er->getFrequenza()));
-        numOccorrenzeSpin->setValue(er->getNumOccorrenze());
-        illimitataCheck->setChecked(er->isIllimitata());
-        
-        formLayout->labelForField(frequenzaCombo)->show();
-        frequenzaCombo->show();
-        formLayout->labelForField(numOccorrenzeSpin)->show();
-        numOccorrenzeSpin->show();
-        illimitataCheck->show();
-
-    } else if (const Evento* ev = dynamic_cast<const Evento*>(a)) {
-        descriptionEdit->setText(ev->getDescrizione());
-        locationEdit->setText(ev->getLuogo());
-        dateTimeEdit->setDateTime(ev->getOrario());
-
-    } else if (Lista* lista = dynamic_cast<Lista*>(a)) {
-        formLayout->labelForField(descriptionEdit)->hide();
-        descriptionEdit->hide();
-        listaEditor->setLista(lista);
-        listaEditor->show();
-    } else {
-        descriptionEdit->setVisible(true);
-    }
+    visitorMode = VisitorMode::Loading;
+    a->accept(*this);
+    dirty = false;
 }
 
-void VistaEditorAttivita::onSave()
-{
+void VistaEditorAttivita::onSave(){
     if (!current) return;
     current->setTitolo(titleEdit->text());
 
-    if (auto* er = dynamic_cast<EventoRicorrente*>(current)) {
-        er->setDescrizione(descriptionEdit->toPlainText());
-        er->setLuogo(locationEdit->text());
-        er->setOrario(dateTimeEdit->dateTime());
-        er->setFrequenza(static_cast<Frequenza>(frequenzaCombo->currentIndex()));
-        er->setNumOccorrenze(numOccorrenzeSpin->value());
-        er->setIllimitata(illimitataCheck->isChecked());
-    }
-    else if (auto* ev = dynamic_cast<Evento*>(current)) {
-        ev->setDescrizione(descriptionEdit->toPlainText());
-        ev->setLuogo(locationEdit->text());
-        ev->setOrario(dateTimeEdit->dateTime());
-    }
-    if (auto* lista = dynamic_cast<Lista*>(current)) {
-        lista->setLuogo(locationEdit->text());
-        lista->setOrario(dateTimeEdit->dateTime());
-    }
+    visitorMode = VisitorMode::Saving;
+    current->accept(*this);
 
     dirty = false;
     emit saved(current->getId());
 }
 
-void VistaEditorAttivita::onCancel()
-{
+void VistaEditorAttivita::onCancel(){
     if (!current) return;
     dirty = false;
     emit cancelled(current->getId());
 }
 
-void VistaEditorAttivita::markDirty()
-{
+void VistaEditorAttivita::markDirty(){
     if (!current) return;
     dirty = true;
 }
 
-bool VistaEditorAttivita::hasUnsavedChanges() const
-{
+bool VistaEditorAttivita::hasUnsavedChanges() const{
     return dirty;
+}
+
+void VistaEditorAttivita::visit(Evento& evento){
+    if (visitorMode == VisitorMode::Loading) {
+        descriptionEdit->setText(evento.getDescrizione());
+        locationEdit->setText(evento.getLuogo());
+        dateTimeEdit->setDateTime(evento.getOrario());
+        return;
+    }
+
+    evento.setDescrizione(descriptionEdit->toPlainText());
+    evento.setLuogo(locationEdit->text());
+    evento.setOrario(dateTimeEdit->dateTime());
+}
+
+void VistaEditorAttivita::visit(EventoRicorrente& evento){
+    if (visitorMode == VisitorMode::Loading) {
+        descriptionEdit->setText(evento.getDescrizione());
+        locationEdit->setText(evento.getLuogo());
+        dateTimeEdit->setDateTime(evento.getOrario());
+        frequenzaCombo->setCurrentIndex(static_cast<int>(evento.getFrequenza()));
+        numOccorrenzeSpin->setValue(static_cast<int>(evento.getNumOccorrenze()));
+        illimitataCheck->setChecked(evento.isIllimitata());
+
+        formLayout->labelForField(frequenzaCombo)->show();
+        frequenzaCombo->show();
+        formLayout->labelForField(numOccorrenzeSpin)->show();
+        numOccorrenzeSpin->show();
+        illimitataCheck->show();
+        return;
+    }
+
+    evento.setDescrizione(descriptionEdit->toPlainText());
+    evento.setLuogo(locationEdit->text());
+    evento.setOrario(dateTimeEdit->dateTime());
+    evento.setFrequenza(static_cast<Frequenza>(frequenzaCombo->currentIndex()));
+    evento.setNumOccorrenze(static_cast<unsigned int>(numOccorrenzeSpin->value()));
+    evento.setIllimitata(illimitataCheck->isChecked());
+}
+
+void VistaEditorAttivita::visit(Lista& lista){
+    if (visitorMode == VisitorMode::Loading) {
+        formLayout->labelForField(descriptionEdit)->hide();
+        descriptionEdit->hide();
+        listaEditor->setLista(&lista);
+        listaEditor->show();
+        return;
+    }
+
+    lista.setLuogo(locationEdit->text());
+    lista.setOrario(dateTimeEdit->dateTime());
 }

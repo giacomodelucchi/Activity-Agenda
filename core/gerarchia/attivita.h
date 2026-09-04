@@ -3,6 +3,8 @@
 
 #include <QString>
 #include <QDateTime>
+#include "attivitaVisitor.h"
+#include "attivitaConstVisitor.h"
 
 class Attivita {
     private:
@@ -21,6 +23,12 @@ class Attivita {
         //Distruttore virtuale puro
         virtual ~Attivita() = 0;
 
+        // Visitor per oggetti modificabili
+        virtual void accept(AttivitaVisitor&) = 0;
+
+        // Visitor per oggetti const
+        virtual void accept(AttivitaConstVisitor&) const = 0;
+            
         //Metodi get
         unsigned int getId() const;
         QString getTitolo() const;
