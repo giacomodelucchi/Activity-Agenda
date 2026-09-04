@@ -56,6 +56,7 @@ private slots:
     void onSearchTextChanged(const QString& text);  // slot per filtrare la lista in base al testo di ricerca
     void onDeleteSelected();
     void onAddRequested(int type);
+    void updateVisibility(int visibleCount);    // slot per aggiornare la visibilità della tabella e del messaggio di stato "Nessuna attività disponibile"
 };
 
 #endif // VISTAELENCOATTIVITA_H

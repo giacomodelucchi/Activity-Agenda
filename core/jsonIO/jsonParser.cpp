@@ -4,6 +4,36 @@
 #include <QDateTime>
 #include <QJsonValue>
 
+namespace {
+struct CommonActivityFields {
+    unsigned int id;
+    QString titolo;
+    QString luogo;
+    QDateTime orario;
+};
+
+QJsonObject commonFieldsToJson(const Attivita& attivita, const QString& tipo)
+{
+    QJsonObject obj;
+    obj["tipo"] = tipo;
+    obj["id"] = static_cast<int>(attivita.getId());
+    obj["titolo"] = attivita.getTitolo();
+    obj["luogo"] = attivita.getLuogo();
+    obj["orario"] = attivita.getOrario().toString(Qt::ISODate);
+    return obj;
+}
+
+CommonActivityFields commonFieldsFromJson(const QJsonObject& obj)
+{
+    return {
+        static_cast<unsigned int>(obj.value("id").toInt()),
+        obj.value("titolo").toString(),
+        obj.value("luogo").toString(),
+        QDateTime::fromString(obj.value("orario").toString(), Qt::ISODate)
+    };
+}
+}
+
 //Costruttore
 JsonParser::JsonParser(const QString& source)
     : source(source) {}
@@ -55,12 +85,7 @@ std::unique_ptr<Attivita> JsonParser::JsonToAttivita(const QJsonObject& obj) {
 // ============================================================
 
 QJsonObject JsonParser::eventoToJson(const Evento& evento) {
-    QJsonObject obj;
-    obj["tipo"] = "Evento";
-    obj["id"] = static_cast<int>(evento.getId());
-    obj["titolo"] = evento.getTitolo();
-    obj["luogo"] = evento.getLuogo();
-    obj["orario"] = evento.getOrario().toString(Qt::ISODate);
+    QJsonObject obj = commonFieldsToJson(evento, "Evento");
     obj["descrizione"] = evento.getDescrizione();
     return obj;
 }
@@ -75,12 +100,7 @@ QJsonObject JsonParser::eventoRicorrenteToJson(const EventoRicorrente& er) {
 }
 
 QJsonObject JsonParser::listaToJson(const Lista& lista) {
-    QJsonObject obj;
-    obj["tipo"] = "Lista";
-    obj["id"] = static_cast<int>(lista.getId());
-    obj["titolo"] = lista.getTitolo();
-    obj["luogo"] = lista.getLuogo();
-    obj["orario"] = lista.getOrario().toString(Qt::ISODate);
+    QJsonObject obj = commonFieldsToJson(lista, "Lista");
 
     QJsonArray arr;
     for (unsigned int i = 0; i < lista.numeroVoci(); ++i) {
@@ -102,37 +122,30 @@ QJsonObject JsonParser::voceListaToJson(const VoceLista& voce) {
 // ============================================================
 
 std::unique_ptr<Attivita> JsonParser::jsonToEvento(const QJsonObject& obj) {
-    unsigned int id = static_cast<unsigned int>(obj.value("id").toInt());
-    QString titolo = obj.value("titolo").toString();
-    QString luogo = obj.value("luogo").toString();
-    QDateTime orario = QDateTime::fromString(obj.value("orario").toString(), Qt::ISODate);
-    QString descrizione = obj.value("descrizione").toString();
-    return std::make_unique<Evento>(id, titolo, luogo, orario, descrizione);
+    const CommonActivityFields fields = commonFieldsFromJson(obj);
+    return std::make_unique<Evento>(fields.id, fields.titolo, fields.luogo,
+                                    fields.orario, obj.value("descrizione").toString());
 }
 
 std::unique_ptr<Attivita> JsonParser::jsonToEventoRicorrente(const QJsonObject& obj) {
-    unsigned int id = static_cast<unsigned int>(obj.value("id").toInt());
-    QString titolo = obj.value("titolo").toString();
-    QString luogo = obj.value("luogo").toString();
-    QDateTime orario = QDateTime::fromString(obj.value("orario").toString(), Qt::ISODate);
-    QString descrizione = obj.value("descrizione").toString();
+    const CommonActivityFields fields = commonFieldsFromJson(obj);
     Frequenza f = stringToFrequenza(obj.value("frequenza").toString());
     unsigned int num = static_cast<unsigned int>(obj.value("numOccorrenze").toInt());
     bool ill = obj.value("illimitata").toBool();
-    return std::make_unique<EventoRicorrente>(id, titolo, luogo, orario, descrizione, f, num, ill);
+    return std::make_unique<EventoRicorrente>(fields.id, fields.titolo, fields.luogo,
+                                              fields.orario, obj.value("descrizione").toString(),
+                                              f, num, ill);
 }
 
 std::unique_ptr<Attivita> JsonParser::jsonToLista(const QJsonObject& obj) {
-    unsigned int id = static_cast<unsigned int>(obj.value("id").toInt());
-    QString titolo = obj.value("titolo").toString();
-    QString luogo = obj.value("luogo").toString();
-    QDateTime orario = QDateTime::fromString(obj.value("orario").toString(), Qt::ISODate);
+    const CommonActivityFields fields = commonFieldsFromJson(obj);
     QVector<VoceLista> elementi;
     QJsonArray arr = obj.value("elementi").toArray();
     for (const QJsonValue& v : arr) {
         if (v.isObject()) elementi.append(jsonToVoceLista(v.toObject()));
     }
-    return std::make_unique<Lista>(id, titolo, luogo, orario, elementi);
+    return std::make_unique<Lista>(fields.id, fields.titolo, fields.luogo,
+                                   fields.orario, elementi);
 }
 
 VoceLista JsonParser::jsonToVoceLista(const QJsonObject& obj) {

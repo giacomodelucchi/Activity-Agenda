@@ -71,6 +71,10 @@ private:
     QPushButton* saveButton = nullptr;
     QPushButton* cancelButton = nullptr;
     bool dirty = false;                 //indica se l'editor ha modifiche non salvate rispetto all'attività corrente
+
+    //per caricare e salvare i campi comuni dell'attività
+    void loadCommonFields(const Attivita&);
+    void saveCommonFields(Attivita&);
 };
 
 #endif // VISTAEDITORATTIVITA_H

@@ -53,6 +53,21 @@ QString VistaDettaglioAttivita::placeholder(const QString& value) const
     return value.trimmed().isEmpty()? tr("Non specificato"): value;
 }
 
+QString VistaDettaglioAttivita::formatCommonDetails(const Attivita& attivita, const QString& tipo) const
+{
+    QString testo;
+    testo += tr("<b>Tipo:</b> %1<br>").arg(tipo);
+    testo += tr("<b>Titolo:</b> %1<br>").arg(placeholder(attivita.getTitolo()));
+    testo += tr("<b>Luogo:</b> %1<br>").arg(placeholder(attivita.getLuogo()));
+
+    const QDateTime orario = attivita.getOrario();
+    testo += tr("<b>Orario:</b> %1<br>").arg(
+        orario.isValid()
+            ? QLocale::system().toString(orario, QLocale::ShortFormat)
+            : tr("Non specificato"));
+    return testo;
+}
+
 void VistaDettaglioAttivita::setActivity(const Attivita* a)
 {
     current = a;
@@ -93,26 +108,14 @@ Implementazione dei metodi del Visitor per la visualizzazione dei dettagli delle
 */
 
 void VistaDettaglioAttivita::visit(const Evento& evento){
-    QString testo;
-
-    testo += tr("<b>Tipo:</b> Evento<br>");
-    testo += tr("<b>Titolo:</b> %1<br>").arg(placeholder(evento.getTitolo()));
-    testo += tr("<b>Luogo:</b> %1<br>").arg(placeholder(evento.getLuogo()));
-    QDateTime orario = evento.getOrario();
-    testo += tr("<b>Orario:</b> %1<br>").arg(orario.isValid() ? QLocale::system().toString(orario, QLocale::ShortFormat) : tr("Non specificato"));
+    QString testo = formatCommonDetails(evento, tr("Evento"));
     testo += tr("<b>Descrizione:</b> %1").arg(placeholder(evento.getDescrizione()));
 
     detailsLabel->setText(testo);
 }
 
 void VistaDettaglioAttivita::visit(const EventoRicorrente& evento){
-    QString testo;
-
-    testo += tr("<b>Tipo:</b> Ricorrenza<br>");
-    testo += tr("<b>Titolo:</b> %1<br>").arg(placeholder(evento.getTitolo()));
-    testo += tr("<b>Luogo:</b> %1<br>").arg(placeholder(evento.getLuogo()));
-    QDateTime orario = evento.getOrario();
-    testo += tr("<b>Orario:</b> %1<br>").arg(orario.isValid()? QLocale::system().toString(orario, QLocale::ShortFormat) : tr("Non specificato"));
+    QString testo = formatCommonDetails(evento, tr("Ricorrenza"));
     testo += tr("<b>Descrizione:</b> %1<br>").arg(placeholder(evento.getDescrizione()));
     testo += tr("<b>Frequenza:</b> %1<br>").arg(frequenzaToString(evento.getFrequenza()));
 
@@ -126,11 +129,7 @@ void VistaDettaglioAttivita::visit(const EventoRicorrente& evento){
 }
 
 void VistaDettaglioAttivita::visit(const Lista& lista){
-    QString testo;
-
-    testo += tr("<b>Tipo:</b> Lista<br>");
-    testo += tr("<b>Titolo:</b> %1<br>").arg(placeholder(lista.getTitolo()));
-    testo += tr("<b>Luogo:</b> %1<br>").arg(placeholder(lista.getLuogo()));
+    QString testo = formatCommonDetails(lista, tr("Lista"));
     testo += tr("<b>Elementi:</b><br>");
 
     for (unsigned int i = 0; i < lista.numeroVoci(); ++i) {

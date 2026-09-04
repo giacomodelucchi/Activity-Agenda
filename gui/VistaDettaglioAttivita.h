@@ -39,6 +39,7 @@ private:
     QPushButton* backButton = nullptr;
 
     QString placeholder(const QString&) const;  //per mostrare un testo di default quando un campo è vuoto
+    QString formatCommonDetails(const Attivita&, const QString&) const; //per formattare i campi comuni di un'attività
 };
 
 #endif // VISTADETTAGLIOATTIVITA_H

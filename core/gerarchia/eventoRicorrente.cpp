@@ -62,6 +62,10 @@ void EventoRicorrente::setIllimitata(bool newIllimitata){
     illimitata = newIllimitata;
 }
 
+/*
+quando si richiede l'orario di un evento ricorrente, 
+viene calcolata la prossima occorrenza futura rispetto alla data attuale
+*/
 QDateTime EventoRicorrente::getOrario() const
 {
     if (!dataInizio.isValid())
@@ -73,7 +77,7 @@ QDateTime EventoRicorrente::getOrario() const
     QDateTime prossimo = dataInizio;
     QDateTime adesso = QDateTime::currentDateTime();
 
-    unsigned int occorrenza = 1;
+    unsigned int occorrenza = 1;   
 
     while (prossimo < adesso)
     {

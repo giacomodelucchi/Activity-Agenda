@@ -83,12 +83,10 @@ void VistaEditorAttivita::editActivity(Attivita* a){
     listaEditor->hide();
 
     // Popola i campi comuni dell'editor con i dati dell'attività corrente
-    titleEdit->setText(a->getTitolo());
+    loadCommonFields(*a);
     formLayout->labelForField(descriptionEdit)->show();
     descriptionEdit->show();
     descriptionEdit->clear();
-    locationEdit->clear();
-    dateTimeEdit->setDateTime(QDateTime::currentDateTime());
     saveButton->setEnabled(true);
     cancelButton->setEnabled(true);
 
@@ -99,7 +97,7 @@ void VistaEditorAttivita::editActivity(Attivita* a){
 
 void VistaEditorAttivita::onSave(){
     if (!current) return;
-    current->setTitolo(titleEdit->text());
+    saveCommonFields(*current); //salva i campi comuni dell'attività corrente
 
     visitorMode = VisitorMode::Saving;
     current->accept(*this);
@@ -126,21 +124,15 @@ bool VistaEditorAttivita::hasUnsavedChanges() const{
 void VistaEditorAttivita::visit(Evento& evento){
     if (visitorMode == VisitorMode::Loading) {
         descriptionEdit->setText(evento.getDescrizione());
-        locationEdit->setText(evento.getLuogo());
-        dateTimeEdit->setDateTime(evento.getOrario());
         return;
     }
 
     evento.setDescrizione(descriptionEdit->toPlainText());
-    evento.setLuogo(locationEdit->text());
-    evento.setOrario(dateTimeEdit->dateTime());
 }
 
 void VistaEditorAttivita::visit(EventoRicorrente& evento){
     if (visitorMode == VisitorMode::Loading) {
         descriptionEdit->setText(evento.getDescrizione());
-        locationEdit->setText(evento.getLuogo());
-        dateTimeEdit->setDateTime(evento.getOrario());
         frequenzaCombo->setCurrentIndex(static_cast<int>(evento.getFrequenza()));
         numOccorrenzeSpin->setValue(static_cast<int>(evento.getNumOccorrenze()));
         illimitataCheck->setChecked(evento.isIllimitata());
@@ -154,8 +146,6 @@ void VistaEditorAttivita::visit(EventoRicorrente& evento){
     }
 
     evento.setDescrizione(descriptionEdit->toPlainText());
-    evento.setLuogo(locationEdit->text());
-    evento.setOrario(dateTimeEdit->dateTime());
     evento.setFrequenza(static_cast<Frequenza>(frequenzaCombo->currentIndex()));
     evento.setNumOccorrenze(static_cast<unsigned int>(numOccorrenzeSpin->value()));
     evento.setIllimitata(illimitataCheck->isChecked());
@@ -170,6 +160,19 @@ void VistaEditorAttivita::visit(Lista& lista){
         return;
     }
 
-    lista.setLuogo(locationEdit->text());
-    lista.setOrario(dateTimeEdit->dateTime());
+}
+
+//funzioni per evitare la duplicazione del codice per caricare e salvare i campi comuni dell'attività
+void VistaEditorAttivita::loadCommonFields(const Attivita& a)
+{
+    titleEdit->setText(a.getTitolo());
+    locationEdit->setText(a.getLuogo());
+    dateTimeEdit->setDateTime(a.getOrario());
+}
+
+void VistaEditorAttivita::saveCommonFields(Attivita& a)
+{
+    a.setTitolo(titleEdit->text());
+    a.setLuogo(locationEdit->text());
+    a.setOrario(dateTimeEdit->dateTime());
 }

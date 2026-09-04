@@ -117,7 +117,7 @@ void VistaElencoAttivita::refreshList()
     list->clear();
     if (!memoria) return;
 
-    unsigned int visibleCount = 0;
+    unsigned int visibleCount = 0;  //numero di attività visibili dopo la ricerca
     const QDateTime now = QDateTime::currentDateTime();
 
     //ricerca della prossima data in cui verrà svolta un'attività
@@ -190,8 +190,7 @@ void VistaElencoAttivita::refreshList()
         visibleCount++;         // serve a contare quante attività sono visibili dopo il filtraggio
     });
 
-    emptyStateLabel->setVisible(visibleCount == 0); // mostra il messaggio di stato vuoto se non ci sono attività 
-    list->setVisible(visibleCount > 0);             // rende visibile la tabella solo se ci sono attività
+    updateVisibility(visibleCount);
     deleteButton->setEnabled(false);                
 }
 
@@ -231,8 +230,7 @@ void VistaElencoAttivita::onSearchTextChanged(const QString& text)
         it->setHidden(!match);
         if (match) visibleCount++;
     }
-    emptyStateLabel->setVisible(visibleCount == 0);
-    list->setVisible(visibleCount > 0);
+    updateVisibility(visibleCount);
 }
 
 QVector<unsigned int> VistaElencoAttivita::selectedActivityIds() const
@@ -250,6 +248,14 @@ void VistaElencoAttivita::clearSelection()
     list->clearSelection();
     deleteButton->setEnabled(false);
 }
+
+// chiamata quando il numero di attività visibili cambia, per mostrare o nascondere il messaggio di stato "Nessuna attività disponibile"
+void VistaElencoAttivita::updateVisibility(int visibleCount)
+{
+    emptyStateLabel->setVisible(visibleCount == 0);
+    list->setVisible(visibleCount > 0);             //mostra la tabella solo se ci sono attività visibili
+}
+
 /*
 ==============================================================================================
 Implementazione dei metodi del Visitor per la diversa colorazione delle righe della tabella a seconda del tipo di attività

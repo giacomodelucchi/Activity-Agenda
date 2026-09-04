@@ -27,7 +27,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 namespace {
 struct qt_meta_stringdata_VistaElencoAttivita_t {
-    uint offsetsAndSizes[34];
+    uint offsetsAndSizes[38];
     char stringdata0[20];
     char stringdata1[17];
     char stringdata2[1];
@@ -45,6 +45,8 @@ struct qt_meta_stringdata_VistaElencoAttivita_t {
     char stringdata14[5];
     char stringdata15[17];
     char stringdata16[15];
+    char stringdata17[17];
+    char stringdata18[13];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_VistaElencoAttivita_t::offsetsAndSizes) + ofs), len 
@@ -66,7 +68,9 @@ Q_CONSTINIT static const qt_meta_stringdata_VistaElencoAttivita_t qt_meta_string
         QT_MOC_LITERAL(142, 19),  // "onSearchTextChanged"
         QT_MOC_LITERAL(162, 4),  // "text"
         QT_MOC_LITERAL(167, 16),  // "onDeleteSelected"
-        QT_MOC_LITERAL(184, 14)   // "onAddRequested"
+        QT_MOC_LITERAL(184, 14),  // "onAddRequested"
+        QT_MOC_LITERAL(199, 16),  // "updateVisibility"
+        QT_MOC_LITERAL(216, 12)   // "visibleCount"
     },
     "VistaElencoAttivita",
     "activitySelected",
@@ -84,7 +88,9 @@ Q_CONSTINIT static const qt_meta_stringdata_VistaElencoAttivita_t qt_meta_string
     "onSearchTextChanged",
     "text",
     "onDeleteSelected",
-    "onAddRequested"
+    "onAddRequested",
+    "updateVisibility",
+    "visibleCount"
 };
 #undef QT_MOC_LITERAL
 } // unnamed namespace
@@ -95,7 +101,7 @@ Q_CONSTINIT static const uint qt_meta_data_VistaElencoAttivita[] = {
       10,       // revision
        0,       // classname
        0,    0, // classinfo
-       7,   14, // methods
+       8,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -103,15 +109,16 @@ Q_CONSTINIT static const uint qt_meta_data_VistaElencoAttivita[] = {
        3,       // signalCount
 
  // signals: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    1,   56,    2, 0x06,    1 /* Public */,
-       4,    1,   59,    2, 0x06,    3 /* Public */,
-       7,    1,   62,    2, 0x06,    5 /* Public */,
+       1,    1,   62,    2, 0x06,    1 /* Public */,
+       4,    1,   65,    2, 0x06,    3 /* Public */,
+       7,    1,   68,    2, 0x06,    5 /* Public */,
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       9,    2,   65,    2, 0x08,    7 /* Private */,
-      13,    1,   70,    2, 0x08,   10 /* Private */,
-      15,    0,   73,    2, 0x08,   12 /* Private */,
-      16,    1,   74,    2, 0x08,   13 /* Private */,
+       9,    2,   71,    2, 0x08,    7 /* Private */,
+      13,    1,   76,    2, 0x08,   10 /* Private */,
+      15,    0,   79,    2, 0x08,   12 /* Private */,
+      16,    1,   80,    2, 0x08,   13 /* Private */,
+      17,    1,   83,    2, 0x08,   15 /* Private */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::UInt,    3,
@@ -123,6 +130,7 @@ Q_CONSTINIT static const uint qt_meta_data_VistaElencoAttivita[] = {
     QMetaType::Void, QMetaType::QString,   14,
     QMetaType::Void,
     QMetaType::Void, QMetaType::Int,    8,
+    QMetaType::Void, QMetaType::Int,   18,
 
        0        // eod
 };
@@ -156,6 +164,9 @@ Q_CONSTINIT const QMetaObject VistaElencoAttivita::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'onAddRequested'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<int, std::false_type>,
+        // method 'updateVisibility'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
         QtPrivate::TypeAndForceComplete<int, std::false_type>
     >,
     nullptr
@@ -174,6 +185,7 @@ void VistaElencoAttivita::qt_static_metacall(QObject *_o, QMetaObject::Call _c, 
         case 4: _t->onSearchTextChanged((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1]))); break;
         case 5: _t->onDeleteSelected(); break;
         case 6: _t->onAddRequested((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
+        case 7: _t->updateVisibility((*reinterpret_cast< std::add_pointer_t<int>>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -234,13 +246,13 @@ int VistaElencoAttivita::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 7)
+        if (_id < 8)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 7;
+        _id -= 8;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 7)
+        if (_id < 8)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 7;
+        _id -= 8;
     }
     return _id;
 }

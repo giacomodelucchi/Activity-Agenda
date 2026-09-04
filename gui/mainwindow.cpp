@@ -171,7 +171,11 @@ void MainWindow::onSave() {
 
     QString path = QFileDialog::getSaveFileName(this, tr("Salva file JSON"), QString(), tr("JSON Files (*.json)"));
     if (path.isEmpty()) return;
-   
+    
+    //se l'utente non ha specificato l'estensione .json nel nome del file, l'aggiungo automaticamente
+    if (!path.endsWith(".json", Qt::CaseInsensitive))
+        path += ".json";
+
     jsonIO.setFilePath(path);
     if (jsonIO.save(memoria)) {
         memoria.salvaEffettuato();  // abbasso il flag di Memoria, ora che ho salvato le attività
