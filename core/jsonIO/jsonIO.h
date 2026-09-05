@@ -14,6 +14,12 @@ private:
         QString filePath;
         JsonParser parser;
 public:
+    enum class LoadResult {
+        Success,
+        Partial,    //il file è stato caricato, ma alcune attività non erano valide e sono state ignorate
+        Failed
+    };
+
     //Costruttore
     explicit JsonIO(const QString& filePath = QString());
 
@@ -27,7 +33,7 @@ public:
     bool save(const Memoria& activities) const;
 
     //legge il contenuto del file path, riempendo un container passato per riferimento
-    bool load(Memoria& activities) const;
+    LoadResult load(Memoria& activities) const; //ritorna Success se tutte le attività sono state caricate correttamente, Partial se alcune attività non erano valide e sono state ignorate, Failed se il caricamento è fallito
 };
 
 #endif //JSONIO_H

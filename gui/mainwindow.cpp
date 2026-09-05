@@ -149,11 +149,14 @@ void MainWindow::onLoad() {
     }
 
     jsonIO.setFilePath(path);
-    if (jsonIO.load(memoria)) {
+    const JsonIO::LoadResult loadResult = jsonIO.load(memoria);
+    if (loadResult != JsonIO::LoadResult::Failed) {
         memoria.salvaEffettuato();  // avendo caricato una nuova lista di attivita, abbasso il flag di Memoria
         elenco->refreshList();
         showElenco();
-        statusBar()->showMessage(tr("File caricato"));
+        statusBar()->showMessage(loadResult == JsonIO::LoadResult::Partial
+            ? tr("File caricato, ma non completamente valido")
+            : tr("File caricato"));
     } else {
         statusBar()->showMessage(tr("Errore caricamento"));
     }

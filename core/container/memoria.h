@@ -15,7 +15,7 @@ public:
     Memoria(const Memoria&) = delete;
     ~Memoria() = default;
 
-    void aggiungi(std::unique_ptr<Attivita> attivita);
+    bool aggiungi(std::unique_ptr<Attivita> attivita);
     bool rimuovi(const Attivita* attivita);
     bool rimuoviPerId(unsigned int idAttivita);
     void svuotaMemoria();

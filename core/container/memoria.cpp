@@ -1,10 +1,13 @@
 #include "memoria.h"
 #include "../gerarchia/attivita.h"
 
-void Memoria::aggiungi(std::unique_ptr<Attivita> attivita) {
-    if (!attivita) return;
-    memoriaAttivita.insert({attivita->getId(), std::move(attivita)});
+bool Memoria::aggiungi(std::unique_ptr<Attivita> attivita) {
+    if (!attivita) return false;
+    const unsigned int id = attivita->getId();
+    const auto risultato = memoriaAttivita.insert({id, std::move(attivita)});
+    if (!risultato.second) return false;    //l'inserimento non è avvenuto perché esiste già un'attività con lo stesso id
     modificheNonSalvate = true;
+    return true;
 }
 
 bool Memoria::rimuovi(const Attivita* attivita) {

@@ -143,7 +143,7 @@ bool runJsonIOTest(const QString& jsonFilePath) {
     }
 
     Memoria caricata;
-    if (!io.load(caricata)) {
+    if (io.load(caricata) == JsonIO::LoadResult::Failed) {
         qWarning() << "runJsonIOTest: caricamento fallito";
         return false;
     }

@@ -19,6 +19,7 @@ public:
     explicit VistaEditorLista(QWidget* parent = nullptr);
 
     void setLista(Lista* lista);
+    void applyChanges(Lista& lista) const;  //applica le modifiche apportate dall'utente alla lista passata come parametro
 
 signals:
     void modified();
@@ -33,6 +34,7 @@ private:
     void aggiornaVista();
 
     Lista* currentLista = nullptr;
+    QVector<VoceLista> elementiDiLavoro;    //vettore che contiene le voci della lista mentre l'utente le modifica nell'editor
 
     QListWidget* voceList = nullptr;
 

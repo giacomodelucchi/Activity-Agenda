@@ -160,6 +160,7 @@ void VistaEditorAttivita::visit(Lista& lista){
         return;
     }
 
+    listaEditor->applyChanges(lista);
 }
 
 //funzioni per evitare la duplicazione del codice per caricare e salvare i campi comuni dell'attività

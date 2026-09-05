@@ -37,7 +37,18 @@ VistaEditorLista::VistaEditorLista(QWidget* parent)
 void VistaEditorLista::setLista(Lista* lista){
 
     currentLista = lista;
+    elementiDiLavoro.clear();
+    if (currentLista) {
+        for (unsigned int i = 0; i < currentLista->numeroVoci(); ++i) {
+            elementiDiLavoro.append(currentLista->getVoce(i));
+        }
+    }
     aggiornaVista();
+}
+
+void VistaEditorLista::applyChanges(Lista& lista) const
+{
+    lista.setElementi(elementiDiLavoro);    //ricrea la lista con le voci modificate dall'utente
 }
 
 void VistaEditorLista::aggiornaVista(){
@@ -49,9 +60,7 @@ void VistaEditorLista::aggiornaVista(){
         return;
     }
 
-    unsigned int numVoci = currentLista->numeroVoci();
-    for(unsigned int i = 0; i < numVoci; ++i){
-        const VoceLista& voce = currentLista->getVoce(i);
+    for (const VoceLista& voce : elementiDiLavoro) {
         auto* item = new QListWidgetItem(voce.getTesto());
 
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable | Qt::ItemIsEditable);
@@ -68,7 +77,7 @@ void VistaEditorLista::aggiungiVoce(){
     if(!currentLista)
         return;
 
-    currentLista->aggiungiVoce(VoceLista(""));  //aggiunta di una voce vuota
+    elementiDiLavoro.append(VoceLista(""));  //aggiunta di una voce vuota
 
     aggiornaVista();
 
@@ -89,7 +98,7 @@ void VistaEditorLista::eliminaVoce(){
     if(indice < 0)
         return;
 
-    currentLista->rimuoviVoce(indice);
+    elementiDiLavoro.removeAt(indice);
     aggiornaVista();
     voceList->clearSelection(); 
     emit modified();
@@ -101,17 +110,11 @@ void VistaEditorLista::aggiornaVoce(QListWidgetItem* item){
         return;
 
     int indice = voceList->row(item);
-    QVector<VoceLista> voci;    
+    if (indice < 0 || indice >= elementiDiLavoro.size())
+        return;
 
-    for(unsigned int i=0; i < currentLista->numeroVoci(); ++i){
-        voci.append(currentLista->getVoce(i));
-    }
-
-    voci[indice].setTesto(item->text());
-
-    voci[indice].setCompletata(item->checkState() == Qt::Checked);
-    
-    currentLista->setElementi(voci);
+    elementiDiLavoro[indice].setTesto(item->text());
+    elementiDiLavoro[indice].setCompletata(item->checkState() == Qt::Checked);
 
     emit modified(); 
 }
